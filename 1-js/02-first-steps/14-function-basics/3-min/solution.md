@@ -10,7 +10,7 @@ function min(a, b) {
 }
 ```
 
-Una solución con un operador de signo de interrogación `'?'`:
+A solution with a question mark operator `'?'`:
 
 ```js
 function min(a, b) {
@@ -18,4 +18,4 @@ function min(a, b) {
 }
 ```
 
-P.D: En el caso de una igualdad `a == b` No importa qué devuelva.
+P.S. In the case of an equality `a == b` it does not matter what to return.
