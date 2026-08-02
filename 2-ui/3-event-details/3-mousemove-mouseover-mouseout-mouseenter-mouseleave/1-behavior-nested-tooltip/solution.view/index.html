@@ -6,7 +6,7 @@
   <style>
     body {
       height: 2000px;
-      /* the tooltip should work after page scroll too */
+      /* El tooltip debe seguir funcionando aúnn después de hacer scroll */
     }
 
     .tooltip {
@@ -54,7 +54,7 @@
 
     <p>Once upon a time there was a mother pig who had three little pigs.</p>
 
-    <p>The three little pigs grew so big that their mother said to them, "You are too big to live here any longer. You must go and build houses for yourselves. But take care that the wolf does not catch you."
+    <p>The three little pigs grew so big that their mother said to them, "You are too big to live here any longer. You must go and build houses for yourselves. But take care that the wolf does not catch you."</p>
 
     <p>The three little pigs set off. "We will take care that the wolf does not catch us," they said.</p>
 
@@ -66,24 +66,25 @@
     let tooltip;
 
     document.onmouseover = function(event) {
-      // important: a fast-moving mouse may "jump" right to a child on an annotated node, skipping the parent
-      // so mouseover may happen on a child.
+      // Importante: un movimiento rápido del mouse podría saltar directamente al descendiente en un nodo anotado, ignorando el padre
+      // por lo tanto mouseover podría ejecutarse en un descendiente.
 
       let anchorElem = event.target.closest('[data-tooltip]');
 
       if (!anchorElem) return;
 
-      // show tooltip and remember it
+      //  Mostrando el tooltip y recordándolo.
       tooltip = showTooltip(anchorElem, anchorElem.dataset.tooltip);
     }
 
     document.onmouseout = function() {
-      // it is possible that mouseout triggered, but we're still inside the element (cause of bubbling)
-      // but in this case we'll have an immediate mouseover,
-      // so the tooltip will be destroyed and shown again
+      // Es posible que mouseout se active, pero estaremos dentro del elemento
+      // (el target ocurrirá dentro y se aparecerá)
+      // pero en este caso tendremos un mouse over inmediato,
+      // entonces el tooltip será destruido y mostrado otra vez.
       //
-      // that's an overhead, but here it's not visible
-      // can be fixed with additional checks
+      // Afortunadamente, el parpadeo no es visble,
+      // ya que ambos eventos ocurren casi al mismo tiempo.
       if (tooltip) {
         tooltip.remove();
         tooltip = false;
@@ -100,7 +101,7 @@
 
       let coords = anchorElem.getBoundingClientRect();
 
-      // position the tooltip over the center of the element
+      // Posicionando el tooltip sobre el centro del elemento
       let left = coords.left + (anchorElem.offsetWidth - tooltipElem.offsetWidth) / 2;
       if (left < 0) left = 0;
 

@@ -4,95 +4,113 @@ libs:
 
 ---
 
-# EL árbol DOM
+# Árbol del Modelo de Objetos del Documento (DOM)
 
-La columna vertebral de un documento HTML son las etiquetas.
+La estructura de un documento HTML son las etiquetas.
 
-De acuerdo con el Modelo de Objetos del Documento (DOM), cada etiqueta HTML es un objeto. Las etiquetas anidadas se llaman "hijos" del que los contiene.
+Según el *Modelo de Objetos del Documento* (DOM), cada etiqueta HTML es un objeto. Las etiquetas anidadas son llamadas "hijas" de la etiqueta que las contiene. El texto dentro de una etiqueta también es un objeto.
 
-El texto dentro de una etiqueta también es un objeto.
+Todos estos objetos son accesibles empleando JavaScript, y podemos usarlos para modificar la página.
 
-Todos estos objetos son accesibles utilizando JavaScript.
+Por ejemplo, `document.body` es el objeto que representa la etiqueta `<body>`.
+
+Ejecutar el siguiente código hará que el `<body>` sea de color rojo durante 3 segundos:
+
+```js run
+document.body.style.background = 'red'; // establece un color de fondo rojo
+
+setTimeout(() => document.body.style.background = '', 3000); // volver atrás
+```
+
+En el caso anterior usamos `style.background` para cambiar el color de fondo del `document.body`, pero existen muchas otras propiedades, tales como:
+
+- `innerHTML` -- contenido HTML del nodo.
+- `offsetWidth` -- ancho del nodo (en píxeles).
+- ..., etc.
+
+Más adelante, aprenderemos otras formas de manipular el DOM, pero primero necesitamos conocer su estructura.
 
 ## Un ejemplo del DOM
 
-Por ejemplo, exploremos el DOM para este documento:
+Comencemos con un documento simple:
 
 ```html run no-beautify
 <!DOCTYPE HTML>
 <html>
 <head>
-  <title>Sobre los Alces</title>
+  <title>About elk</title>
 </head>
 <body>
-  La verdad sobre los alces.
+  The truth about elk.
 </body>
 </html>
 ```
-El DOM representa el HTML como una estructura de árbol de etiquetas. Así es como se ve:
+
+El DOM representa el HTML como una estructura de árbol de etiquetas. A continuación podemos ver cómo se muestra:
 
 <div class="domtree"></div>
 
 <script>
-let node1 = {"name":"HTML","nodeType":1,"children":[{"name":"HEAD","nodeType":1,"children":[{"name":"#text","nodeType":3,"content":"\n    "},{"name":"TITLE","nodeType":1,"children":[{"name":"#text","nodeType":3,"content":"Sobre los alces"}]},{"name":"#text","nodeType":3,"content":"\n  "}]},{"name":"#text","nodeType":3,"content":"\n  "},{"name":"BODY","nodeType":1,"children":[{"name":"#text","nodeType":3,"content":"\n  La verdad sobre los alces."}]}]}
+let node1 = {"name":"HTML","nodeType":1,"children":[{"name":"HEAD","nodeType":1,"children":[{"name":"#text","nodeType":3,"content":"\n  "},{"name":"TITLE","nodeType":1,"children":[{"name":"#text","nodeType":3,"content":"About elk"}]},{"name":"#text","nodeType":3,"content":"\n"}]},{"name":"#text","nodeType":3,"content":"\n"},{"name":"BODY","nodeType":1,"children":[{"name":"#text","nodeType":3,"content":"\n  The truth about elk.\n"}]}]}
 
 drawHtmlTree(node1, 'div.domtree', 690, 320);
 </script>
 
 ```online
-En la imagen de arriba, puede hacer clic en los nodos de elementos y sus hijos se abrirán/contraerán.
+En la imagen de arriba, puedes hacer clic sobre los nodos del elemento y como resultado se expanden/colapsan sus nodos hijos.
 ```
 
-Las etiquetas se denominan *nodos de elementos* (o simplemente elementos). Las etiquetas anidadas se convierten en hijos del que los contiene. Como resultado tenemos un árbol de elementos: `<html>` está en la raíz, entonces `<head>` y `<body>` son sus hijos, etc.
+Cada nodo del árbol es un objeto.
 
-El texto dentro de los elementos forman *nodos de texto*, etiquetados como `#text`. Un nodo de texto contiene sólo una cadena. Puede que no tenga hijos y siempre es una hoja del árbol.
+Las etiquetas son *nodos de elementos* (o simplemente "elementos") y forman la estructura del árbol. `<html>` está ubicado en la raíz del documento, por lo tanto, `<head>` y `<body>` son sus hijos, etc.
 
-Por ejemplo, la etiqueta `<title>` tiene el texto `"Sobre los alces"`.
+El texto dentro de los elementos forma *nodos de texto*, y son etiquetados como `#text`. Un nodo de texto puede contener únicamente una cadena y no puede tener hijos, siempre es una hoja del árbol.
 
-Ten en cuenta los caracteres especiales en los nodos de texto:
+Por ejemplo, la etiqueta `<title>` tiene el texto `"About elk"`.
 
-- Una nueva linea: `↵` (en JavaScript se conoce como `\n`)
-- Un espacio: `␣`
+Hay que tener en cuenta los caracteres especiales en nodos de texto:
 
-Los espacios y las nuevas líneas son caracteres totalmente válidos, forman nodos de texto y se convierten en parte del DOM. Así, por ejemplo, en el ejemplo anterior, la etiqueta `<head>` contiene algunos espacios antes de `<title>`, y ese texto se convierte en un nodo `#text` (contiene una nueva línea y solo algunos espacios).
+- una línea nueva: `↵` (en JavaScript se emplea `\n` para obtener este resultado)
+- un espacio: `␣`
 
-Solo hay dos exclusiones de nivel superior:
-1. Los espacios y las nuevas líneas antes de `<head>` se ignoran por razones históricas,
-2. Si colocamos algo después de `</body>`, entonces eso se mueve automáticamente dentro de `body`, al final, ya que la especificación HTML requiere que todo el contenido esté dentro de `<body>`. Así que puede que no haya espacios después de `</body>`.
+Los espacios y líneas nuevas son caracteres totalmente válidos, al igual que letras y dígitos. Ellos forman nodos de texto y se convierten en parte del DOM. Así, por ejemplo, en el caso de arriba la etiqueta `<head>` contiene algunos espacios antes de la etiqueta `<title>`, entonces ese texto se convierte en el nodo `#text`, que contiene una nueva línea y solo algunos espacios.
 
-En los demás casos, todo es más sencillo: si hay espacios (como cualquier carácter) en el documento, entonces se convierten en nodos de texto en el DOM, y si los eliminamos, entonces no habrá ninguno.
+Hay solo dos excepciones de nivel superior:
+1. Los espacios y líneas nuevas ubicados antes de la etiqueta `<head>` son ignorados por razones históricas.
+2. Si colocamos algo después de la etiqueta `</body>`, automáticamente se situará dentro de `body`, en el final, ya que la especificación HTML necesita que todo el contenido esté dentro de la etiqueta `<body>`. No puede haber espacios después de esta.
 
-Aquí no hay nodos de texto de solo espacios:
+En otros casos todo es sencillo: si hay espacios (como cualquier carácter) en el documento, se convierten en nodos de texto en el DOM; y si los eliminamos, entonces no habrá nodo.
+
+En el siguiente ejemplo, no hay nodos de texto con espacios en blanco:
 
 ```html no-beautify
 <!DOCTYPE HTML>
-<html><head><title>Sobre los alces</title></head><body>La verdad sobre los alces.</body></html>
+<html><head><title>About elk</title></head><body>The truth about elk.</body></html>
 ```
 
 <div class="domtree"></div>
 
 <script>
-let node2 = {"name":"HTML","nodeType":1,"children":[{"name":"HEAD","nodeType":1,"children":[{"name":"TITLE","nodeType":1,"children":[{"name":"#text","nodeType":3,"content":"About elks"}]}]},{"name":"BODY","nodeType":1,"children":[{"name":"#text","nodeType":3,"content":"The truth about elks."}]}]}
+let node2 = {"name":"HTML","nodeType":1,"children":[{"name":"HEAD","nodeType":1,"children":[{"name":"TITLE","nodeType":1,"children":[{"name":"#text","nodeType":3,"content":"About elk"}]}]},{"name":"BODY","nodeType":1,"children":[{"name":"#text","nodeType":3,"content":"The truth about elk."}]}]}
 
 drawHtmlTree(node2, 'div.domtree', 690, 210);
 </script>
 
-```smart header="Los espacios de borde y el texto vacío intermedio suelen estar ocultos en las herramientas"
-Las herramientas del navegador (que se cubrirán pronto) que trabajan con el DOM generalmente no muestran espacios al inicio/final del texto y nodos de texto vacíos (saltos de línea) entre etiquetas.
+```smart header="Las herramientas, por lo general, ocultan los espacios al inicio/final de la cadena y los nodos de texto que solo contienen espacios en blanco"
+Las herramientas del navegador (las veremos más adelante) que trabajan con el DOM usualmente no muestran espacios al inicio/final del texto ni los nodos de texto vacíos (saltos de línea) entre etiquetas.
 
-Esto se debe a que se utilizan principalmente para decorar el HTML y no afectan la forma en que se muestra (en la mayoría de los casos).
+De esta manera ahorran espacio en la pantalla.
 
-En otras imágenes de DOM, a veces las omitimos donde son irrelevantes, para mantener las cosas cortas.
+En las próximas representaciones del DOM, las omitiremos cuando sean irrelevantes. Tales espacios generalmente no afectan la forma en la cual el documento es mostrado.
 ```
 
+## Autocorrección
 
-## Autocorrecctión
+Si el navegador encuentra HTML mal escrito, lo corrige automáticamente al construir el DOM.
 
-Si el navegador encuentra HTML con formato incorrecto, lo corrige automáticamente al crear el DOM.
+Por ejemplo, la etiqueta superior siempre será `<html>`. Incluso si no existe en el documento, ésta existirá en el DOM, puesto que el navegador la creará. Sucede lo mismo con la etiqueta `<body>`.
 
-Por ejemplo, la etiqueta superior siempre es `<html>`. Incluso si no existe en el documento, existirá en el DOM, el navegador lo creará. Lo mismo ocurre con `<body>`.
-
-Como ejemplo, si el archivo HTML es una sola palabra "Hola", el navegador lo incluirá en `<html>` y `<body>`, agregará el `<head>` requerido, y el DOM será:
+Como ejemplo de esto, si el archivo HTML es la palabra `"Hello"`, el navegador lo envolverá con las etiquetas `<html>` y `<body>`, y añadirá la etiqueta `<head>` la cual es requerida. Basado en esto, el DOM resultante será:
 
 
 <div class="domtree"></div>
@@ -105,7 +123,7 @@ drawHtmlTree(node3, 'div.domtree', 690, 150);
 
 Al generar el DOM, los navegadores procesan automáticamente los errores en el documento, cierran etiquetas, etc.
 
-El siguiente documento "inválido":
+Un documento sin etiquetas de cierre:
 
 ```html no-beautify
 <p>Hello
@@ -114,7 +132,7 @@ El siguiente documento "inválido":
 <li>Dad
 ```
 
-...Se convertirá en un DOM normal, ya que el navegador lee las etiquetas y restaura las partes faltantes:
+...se convertirá en un DOM normal a medida que el navegador lee las etiquetas y compone las partes faltantes:
 
 <div class="domtree"></div>
 
@@ -124,8 +142,8 @@ let node4 = {"name":"HTML","nodeType":1,"children":[{"name":"HEAD","nodeType":1,
 drawHtmlTree(node4, 'div.domtree', 690, 360);
 </script>
 
-````warn header="Las tablas siempre tienen `<tbody>`"
-Un interesante "caso especial" son las tablas. Según la especificación del DOM, deben tener `<tbody>`, pero el texto HTML puede omitirlo. Entonces el navegador crea `<tbody>` en el DOM automáticamente.
+````warn header="Las tablas siempre tienen la etiqueta `<tbody>`"
+Un caso especial interesante son las tablas. De acuerdo a la especificación DOM deben tener la etiqueta `<tbody>`, sin embargo el texto HTML puede omitirla: el navegador crea automáticamente la etiqueta `<tbody>` en el DOM.
 
 Para el HTML:
 
@@ -133,7 +151,7 @@ Para el HTML:
 <table id="table"><tr><td>1</td></tr></table>
 ```
 
-La estructura DOM será:
+La estructura del DOM será:
 <div class="domtree"></div>
 
 <script>
@@ -142,24 +160,26 @@ let node5 = {"name":"TABLE","nodeType":1,"children":[{"name":"TBODY","nodeType":
 drawHtmlTree(node5,  'div.domtree', 600, 200);
 </script>
 
-¿Lo ves? El `<tbody>` apareció de la nada. Debes tener esto en cuenta cuando trabajes con tablas para evitar sorpresas.
+¿Lo ves? La etiqueta `<tbody>` apareció de la nada. Debemos tener esto en cuenta al trabajar con tablas para evitar sorpresas.
 ````
 
 ## Otros tipos de nodos
 
-Agreguemos más etiquetas y un comentario a la página:
+Existen otros tipos de nodos además de elementos y nodos de texto. 
+
+Por ejemplo, los comentarios:
 
 ```html
 <!DOCTYPE HTML>
 <html>
 <body>
-  La verdad sobre los alces.
+  The truth about elk.
   <ol>
-    <li>Un alce es inteligente.</li>
+    <li>An elk is a smart</li>
 *!*
     <!-- comentario -->
 */!*
-    <li>...y un astuto animal!</li>
+    <li>...y el astuto animal!</li>
   </ol>
 </body>
 </html>
@@ -168,93 +188,95 @@ Agreguemos más etiquetas y un comentario a la página:
 <div class="domtree"></div>
 
 <script>
-let node6 = {"name":"HTML","nodeType":1,"children":[{"name":"HEAD","nodeType":1,"children":[]},{"name":"BODY","nodeType":1,"children":[{"name":"#text","nodeType":3,"content":"\n  La verdad sobre los alces.\n    "},{"name":"OL","nodeType":1,"children":[{"name":"#text","nodeType":3,"content":"\n      "},{"name":"LI","nodeType":1,"children":[{"name":"#text","nodeType":3,"content":"Un alce es inteligente."}]},{"name":"#text","nodeType":3,"content":"\n      "},{"name":"#comment","nodeType":8,"content":"comentario"},{"name":"#text","nodeType":3,"content":"\n      "},{"name":"LI","nodeType":1,"children":[{"name":"#text","nodeType":3,"content":"...y un astuto animal!"}]},{"name":"#text","nodeType":3,"content":"\n    "}]},{"name":"#text","nodeType":3,"content":"\n  \n"}]}]};
+let node6 = {"name":"HTML","nodeType":1,"children":[{"name":"HEAD","nodeType":1,"children":[]},{"name":"BODY","nodeType":1,"children":[{"name":"#text","nodeType":3,"content":"\n  The truth about elk.\n  "},{"name":"OL","nodeType":1,"children":[{"name":"#text","nodeType":3,"content":"\n    "},{"name":"LI","nodeType":1,"children":[{"name":"#text","nodeType":3,"content":"An elk is a smart"}]},{"name":"#text","nodeType":3,"content":"\n    "},{"name":"#comment","nodeType":8,"content":"comment"},{"name":"#text","nodeType":3,"content":"\n    "},{"name":"LI","nodeType":1,"children":[{"name":"#text","nodeType":3,"content":"...and cunning animal!"}]},{"name":"#text","nodeType":3,"content":"\n  "}]},{"name":"#text","nodeType":3,"content":"\n\n\n"}]}]};
 
 drawHtmlTree(node6, 'div.domtree', 690, 500);
 </script>
 
-Aquí vemos un nuevo tipo de nodo de árbol: el *nodo comentario*, etiquetado como `#comment`.
+Aquí podemos ver un nuevo tipo de nodo: *nodo de comentario*, etiquetado como `#comment`, entre dos nodos de texto.
 
-Podemos pensar: ¿por qué se agrega un comentario al DOM? No afecta a la representación visual de ninguna manera. Pero hay una regla: si algo está en el HTML, entonces también debe estar en el árbol DOM.
+Podemos pensar: ¿Por qué se agrega un comentario al DOM? Esto no afecta la representación de ninguna manera. Pero hay una regla: si algo está en el código HTML, entonces también debe estar en el árbol DOM.
 
-**Todo en el HTML, incluso los comentarios, se convierten en parte del DOM.**
+**Todo en HTML, incluso los comentarios, se convierte en parte del DOM.**
 
-Incluso la directiva `<! DOCTYPE ...>` al principio de HTML también es un nodo DOM. Está en el árbol DOM justo antes de `<html>`. No vamos a tocar ese nodo, ni siquiera lo dibujamos en diagramas por esa razón, pero está ahí.
+Hasta la declaración `<!DOCTYPE...>` al principio del HTML es un nodo del DOM. Su ubicación en el DOM es justo antes de la etiqueta `<html>`. No vamos a tocar ese nodo, por esa razón ni siquiera lo dibujamos en diagramas, pero esta ahí.
 
-El objeto `document` que representa todo el documento es, formalmente, un nodo DOM también.
+El objeto `document` que representa todo el documento es también, formalmente, un nodo DOM.
 
-Hay [12 tipos](https://dom.spec.whatwg.org/#node) de nodos. En la práctica solemos trabajar solo con 4 de ellos:
+Hay [12 tipos de nodos](https://dom.spec.whatwg.org/#node). En la práctica generalmente trabajamos con 4 de ellos:
 
-1. document - el "punto de entrada" en el DOM.
-2. Nodos de elementos: etiquetas HTML, los bloques de construcción del árbol.
-3. Nodos de texto: contienen texto.
-4. Comentarios: a veces podemos poner la información allí, no se mostrará, pero JS puede leerla desde el DOM.
+1. `document` -- el "punto de entrada" en el DOM.
+2. nodos de elementos -- Etiquetas-HTML, los bloques de construcción del árbol.
+3. nodos de texto -- contienen texto.
+4. comentarios -- Podríamos colocar información allí. No se mostrará, pero JS puede leerla desde el DOM.
 
-## Velo por ti mismo
+## Véalo usted mismo
 
-Para ver la estructura del DOM en tiempo real, prueba [Live DOM Viewer](http://software.hixie.ch/utilities/js/live-dom-viewer/). Simplemente escriba el documento y se mostrará el DOM en un instante.
+Para ver la estructura del DOM en tiempo real, intente [Live DOM Viewer](https://software.hixie.ch/utilities/js/live-dom-viewer/). Simplemente escriba el documento, y se mostrará como un DOM al instante.
 
-## El inspector del navegador.
+Otra forma de explorar el DOM es usando la herramienta para desarrolladores del navegador. En realidad, eso es lo que usamos cuando estamos desarrollando.
 
-Otra forma de explorar el DOM es usar las herramientas de desarrollo del navegador. En realidad, eso es lo que usamos al desarrollar.
+Para hacerlo, abra la página web [elk.html](elk.html), active las herramientas para desarroladores del navegador y cambie la pestaña a elementos.
 
-Para hacerlo, abre la página web [elks.html](elks.html), activa las herramientas de desarrollo del navegador y cambia a la pestaña Elementos.
+Debe verse así:
 
-Debe tener el siguiente aspecto:
+![](elk.svg)
 
-![](elks.png)
+Puedes ver el DOM, hacer clic sobre los elementos, ver sus detalles, etc.
 
-Puedes ver el DOM, hacer clic en los elementos, ver sus detalles y así sucesivamente.
+Tenga en cuenta que la estructura DOM en la herramienta para desarrolladores está simplificada. Los nodos de texto se muestran como texto. Y no hay nodos de texto con espacios en blanco en absoluto. Esto es aceptable, porque la mayoría de las veces nos interesan los nodos de elementos.
 
-Ten en cuenta que la estructura DOM en las herramientas de desarrollo está simplificada. Los nodos de texto se muestran solo como texto. Y no hay nodos de texto "en blanco" (solo espacio) en absoluto. Eso está bien, porque la mayoría de las veces estamos interesados ​​en los nodos de elementos.
+Hacer clic en el botón <span class="devtools" style="background-position:-328px -124px"></span> ubicado en la esquina superior izquierda nos permite elegir un nodo desde la página web utilizando un "mouse" (u otros dispositivos de puntero) e "inspeccionar" (desplazarse hasta él en la pestaña elementos). Esto funciona muy bien cuando tenemos una página HTML enorme (y el DOM correspondiente es enorme) y nos gustaría ver la posición de un elemento en particular.
 
-Al hacer clic en el botón <span class="devtools" style="background-position:-328px -124px"></span> en la esquina superior izquierda, se puede elegir un nodo de la página web usando un mouse (u otros dispositivos de puntero) e "inspeccionarlo" (desplácese hasta él en la pestaña Elementos). Esto funciona muy bien cuando tenemos una gran página HTML (y el enorme DOM correspondiente) y nos gustaría ver el lugar de un elemento particular en ella.
+Otra forma de realizarlo sería hacer clic derecho en la página web y en el menú contextual elegir la opción "Inspeccionar Elemento".
 
-Otra forma de hacerlo sería simplemente haciendo clic derecho en una página web y seleccionando "Inspeccionar" en el menú contextual.
+![](inspect.svg)
 
-![](inspect.png)
+En la parte derecha de las herramientas encontramos las siguientes sub-pestañas:
+- **Styles** -- podemos ver CSS aplicado al elemento actual regla por regla, incluidas las reglas integradas (gris). Casi todo puede ser editado en el lugar, incluyendo las dimensiones/márgenes/relleno de la siguiente caja.
+- **Computed** -- nos permite ver cada propiedad CSS aplicada al elemento: para cada propiedad podemos ver la regla que la provee (incluida la herencia CSS y demás).
+- **Event Listeners** -- nos ayuda a ver los "escuchadores de eventos" adosados a elementos del DOM (los cubriremos en la siguiente parte del tutorial). 
+- ...,etc.
 
-En la parte derecha de las herramientas puedes observar las siguientes subpestañas:
-- **Styles**: podemos ver el CSS aplicado al elemento actual, incluidas las reglas utilizadas (gris). Casi todo se puede editar en el lugar, incluidas las dimensiones/márgenes/rellenos.
-- **Computed**: para ver el CSS aplicado al elemento por propiedad, para cada propiedad podemos ver su origen (incluida la herencia de CSS y demás).
-- **Event Listeners**: para ver detectores de eventos adjuntos a elementos DOM (los cubriremos en la siguiente parte del tutorial).
-- ...y así.
+La mejor manera de estudiarlos es haciendo clic en ellos. Casi todos los valores son editables en el lugar.
 
-La mejor manera de estudiarlos es hacer clic en ellos. La mayoría de los valores son editables en el lugar.
+## Interacción con la consola
 
-## Interacción con la consola.
+A medida que trabajamos con el DOM, también podemos querer aplicarle JavaScript. Por ejemplo, obtener un nodo y ejecutar algún código para modificarlo y ver el resultado. Aquí hay algunos consejos para desplazarse entre la pestaña elementos y la consola.
 
-A medida que exploramos el DOM, es posible que quieras aplicarle JavaScript. Como obtener un nodo y ejecutar algún código para modificarlo, para ver cómo se ve. Aquí hay algunos consejos para moverse entre la pestaña Elementos y la consola.
+Para empezar:
 
-- Selecciona el primer `<li>` en la pestaña Elementos.
-- Presiona `key:Esc`: se abrirá la consola justo debajo de la pestaña Elementos.
+1. Seleccione el primer elemento `<li>` en la pestaña elementos.
+2. Presiona `key:Esc`. Esto abrirá la consola justo debajo de la pestaña de elementos.
 
-Ahora el último elemento seleccionado está disponible como `$0`, el seleccionado previamente es `$1`, etc.
+Ahora el último elemento seleccionado esta disponible como `$0`, el seleccionado previamente es `$1`, etc.
 
-Podemos ejecutar comandos sobre ellos. Por ejemplo, `$0.style.background = 'red'` hace que el elemento de la lista seleccionada se vuelva rojo, así:
+Podemos ejecutar comandos en ellos. Por ejemplo, `$0.style.background = 'red'` hace que el elemento de la lista seleccionado sea rojo, algo así:
 
-![](domconsole0.png)
+![](domconsole0.svg)
 
-Desde el otro lado, si estamos en la consola y tenemos una variable que hace referencia a un nodo DOM, entonces podemos usar el comando `inspect(node)` para verlo en el panel Elementos.
+Así es como se obtiene un nodo de los elementos en la consola.
 
-O simplemente podemos mostrarlo en la consola y explorar "en el lugar", como `document.body` en la siguiente imagen:
+También está el camino inverso. Si hay una variable que hace referencia a un nodo del DOM, usamos el comando `inspect(node)` en la consola para verlo en el panel de elementos.
 
-![](domconsole1.png)
+O simplemente podemos imprimir el nodo del DOM en la consola y explorarlo en el lugar, tal como `document.body` a continuación:
 
-Eso es para propósitos de depuración, por supuesto. A partir del siguiente capítulo, accederemos y modificaremos el DOM usando JavaScript.
+![](domconsole1.svg)
 
-Las herramientas de desarrollo del navegador son de gran ayuda en el desarrollo: podemos explorar el DOM, probar cosas y ver qué falla.
+Desde luego, eso es para propósitos de depuración. A partir del siguiente capítulo accederemos y modificaremos el DOM usando JavaScript.
+
+Las herramientas para desarrolladores del navegador son de mucha ayuda en el desarrollo: podemos explorar el DOM, probar cosas y ver qué sale mal.
 
 ## Resumen
 
-Un documento HTML/XML se representa dentro del navegador como el árbol DOM.
+Un documento HTML/XML esta representado dentro del navegador como un árbol de nodos (DOM).
 
-- Las etiquetas se convierten en nodos de elementos y forman la estructura.
+- Las etiquetas se convierten en nodos de elemento y forman la estructura.
 - El texto se convierte en nodos de texto.
-- ...etc, todo en el HTML tiene su lugar en el DOM, incluso los comentarios.
+- ...etc, todos los elementos de HTML tienen su lugar en el DOM, incluso los comentarios.
 
-Podemos usar las herramientas de desarrollo para inspeccionar el DOM y modificarlo manualmente.
+Podemos utilizar las herramientas para desarrolladores para inspeccionar el DOM y modificarlo manualmente.
 
-Aquí cubrimos lo básico, las acciones más usadas e importantes para comenzar. Hay una extensa documentación sobre las Herramientas de desarrollo de Chrome en <https://developers.google.com/web/tools/chrome-devtools>. La mejor manera de aprender las herramientas es haciendo clic aquí y allá, leyendo los menús: la mayoría de las opciones son obvias. Más tarde, cuando los conozcas, lee la documentación y explora el resto.
+Aquí hemos cubierto los conceptos básicos, las acciones más importantes y utilizadas para comenzar. Hay una extensa documentación acerca de las herramientas para desarrolladores de Chrome en <https://developers.google.com/web/tools/chrome-devtools>. La mejor forma de aprender a usar las herramientas es hacer clic en ellas, leer los menús: la mayoría de las opciones son obvias. Más adelante, cuando tenga conocimiento general sobre ellas, lea la documentación y elija el resto.
 
-Los nodos DOM tienen propiedades y métodos que permiten viajar entre ellos, modificarlos, moverse por la página y más. Nos pondremos en contacto con ellos en los próximos capítulos.
+Los nodos del DOM tienen propiedades y métodos que nos permiten desplazarnos entre ellos, modificarlos, movernos por la página, y más. Empezaremos a realizar todo esto en los siguientes capítulos.

@@ -2,13 +2,13 @@ importance: 4
 
 ---
 
-# Get average age
+# Obtener edad promedio
 
-Write the function `getAverageAge(users)` that gets an array of objects with property `age` and gets the average.
+Escribe la función `getAverageAge(users)` que obtenga un array de objetos con la propiedad `age` y devuelva el promedio de `age`.
 
-The formula for the average is `(age1 + age2 + ... + ageN) / N`.
+La fórmula de promedio es `(age1 + age2 + ... + ageN) / N`.
 
-For instance:
+Por ejemplo:
 
 ```js no-beautify
 let john = { name: "John", age: 25 };
@@ -19,4 +19,3 @@ let arr = [ john, pete, mary ];
 
 alert( getAverageAge(arr) ); // (25 + 30 + 29) / 3 = 28
 ```
-

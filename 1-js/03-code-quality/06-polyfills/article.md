@@ -1,57 +1,89 @@
 
-# Polyfills
+# Polyfills y transpiladores
 
-The JavaScript language steadily evolves. New proposals to the language appear regularly, they are analyzed and, if considered worthy, are appended to the list at <https://tc39.github.io/ecma262/> and then progress to the [specification](http://www.ecma-international.org/publications/standards/Ecma-262.htm).
+El lenguaje JavaScript evoluciona constantemente. Nuevas propuestas al lenguaje aparecen regularmente, son analizadas y, si se consideran valiosas, se agregan a la lista en <https://tc39.github.io/ecma262/> y luego avanzan a la [especificación](https://www.ecma-international.org/publications/standards/ecma-262.htm).
 
-Teams behind JavaScript engines have their own ideas about what to implement first. They may decide to implement proposals that are in draft and postpone things that are already in the spec, because they are less interesting or just harder to do.
+Los equipos de desarrollo detrás de los intérpretes (engines) de JavaScript tienen sus propias ideas sobre qué implementar primero. Pueden decidir implementar propuestas que están en borrador y posponer cosas que ya están en la especificación porque son menos interesantes o simplemente porque son más difíciles de hacer.
 
-So it's quite common for an engine to implement only the part of the standard.
+Por lo tanto, es bastante común para un intérprete implementar solo parte del estándar.
 
-A good page to see the current state of support for language features is <https://kangax.github.io/compat-table/es6/> (it's big, we have a lot to study yet).
+Una buena página para ver el estado actual de soporte de características del lenguaje es <https://compat-table.github.io/compat-table/es6/> (es grande, todavía tenemos mucho que aprender).
 
-## Babel
+Como programadores, queremos las características más recientes. Cuanto más, ¡mejor!
 
-When we use modern features of the language, some engines may fail to support such code. Just as said, not all features are implemented everywhere.
+Por otro lado, ¿cómo hacer que nuestro código moderno funcione en intérpretes más viejos que aún no entienden las características más nuevas?
 
-Here Babel comes to the rescue.
+Hay dos herramientas para ello:
 
-[Babel](https://babeljs.io) is a [transpiler](https://en.wikipedia.org/wiki/Source-to-source_compiler). It rewrites modern JavaScript code into the previous standard.
+1. Transpiladores
+2. Polyfills.
 
-Actually, there are two parts in Babel:
+En este artículo nuestro propósito es llegar a la esencia de cómo trabajan y su lugar en el desarrollo web.
 
-1. First, the transpiler program, which rewrites the code. The developer runs it on their own computer. It rewrites the code into the older standard. And then the code is delivered to the website for users. Modern project build system like [webpack](http://webpack.github.io/) or [brunch](http://brunch.io/) provide means to run transpiler automatically on every code change, so that doesn't involve any time loss from our side.
+## Transpiladores
 
-2. Second, the polyfill.
+Un [transpilador](https://es.wikipedia.org/wiki/Transpilador) es un software que traduce un código fuente a otro código fuente. Puede analizar ("leer y entender") código moderno y rescribirlo usando sintaxis y construcciones más viejas para que también funcione en intérpretes antiguos.
 
-    The transpiler rewrites the code, so syntax features are covered. But for new functions we need to write a special script that implements them. JavaScript is a highly dynamic language, scripts may not just add new functions, but also modify built-in ones, so that they behave according to the modern standard.
+Por ejemplo, antes del año 2020 JavaScript no tenía el operador "nullish coalescing" `??`. Entonces, si un visitante lo usa en un navegador desactualizado, este fallaría en entender un código como `height = height ?? 100`.
 
-    There's a term "polyfill" for scripts that "fill in" the gap and add missing implementations.
+Un transpilador analizaría nuestro código y rescribiría `height ?? 100` como `(height !== undefined && height !== null) ? height : 100`.
 
-    Two interesting polyfills are:
-    - [babel polyfill](https://babeljs.io/docs/usage/polyfill/) that supports a lot, but is big.
-    - [polyfill.io](http://polyfill.io) service that allows to load/construct polyfills on-demand, depending on the features we need.
+```js
+// antes de ejecutar el transpilador
+height = height ?? 100;
 
-So, we need to setup the transpiler and add the polyfill for old engines to support modern features.
-
-If we orient towards modern engines and do not use features except those supported everywhere, then we don't need to use Babel.
-
-## Examples in the tutorial
-
-
-````online
-Most examples are runnable at-place, like this:
-
-```js run
-alert('Press the "Play" button in the upper-right corner to run');
+// después de ejecutar el transpilador
+height = (height !== undefined && height !== null) ? height : 100;
 ```
 
-Examples that use modern JS will work only if your browser supports it.
-````
+Ahora el código rescrito es apto para los intérpretes de JavaScript más viejos.
 
-```offline
-As you're reading the offline version, examples are not runnable. But they usually work :)
+Usualmente, un desarrollador ejecuta el transpilador en su propia computadora y luego despliega el código transpilado al servidor.
+
+Acerca de nombres, [Babel](https://babeljs.io) es uno de los más prominentes transpiladores circulando.
+
+Sistemas de desarrollo de proyectos modernos, tales como [webpack](https://webpack.js.org/), brindan los medios para ejecutar la transpilación automática en cada cambio de código, haciendo muy fácil la integración al proceso de desarrollo.
+
+## Polyfills
+
+Nuevas características en el lenguaje pueden incluir no solo construcciones sintácticas y operadores, sino también funciones integradas.
+
+Por ejemplo, `Math.trunc(n)` es una función que corta la parte decimal de un número, ej. `Math.trunc(1.23)` devuelve `1`.
+
+En algunos (muy desactualizados) intérpretes JavaScript no existe `Math.trunc`, así que tal código fallará.
+
+Aquí estamos hablando de nuevas funciones, no de cambios de sintaxis. No hay necesidad de transpilar nada. Solo necesitamos declarar la función faltante.
+
+Un script que actualiza o agrega funciones nuevas es llamado "polyfill". Este llena los vacíos agregando las implementaciones que faltan.
+
+En este caso particular, el polyfill para `Math.trunc` es un script que lo implementa:
+
+```js
+if (!Math.trunc) { // no existe tal función
+  // implementarla
+  Math.trunc = function(number) {
+    // Math.ceil y Math.floor existen incluso en los intérpretes antiguos
+    // los cubriremos luego en el tutorial
+    return number < 0 ? Math.ceil(number) : Math.floor(number);
+  };
+}
 ```
 
-[Chrome Canary](https://www.google.com/chrome/browser/canary.html) is good for all examples, but other modern browsers are mostly fine too.
+JavaScript es un lenguaje muy dinámico, los scripts pueden agregar o modificar cualquier función, incluso las integradas. 
 
-Note that on production we can use Babel to translate the code into suitable for less recent browsers, so there will be no such limitation, the code will run everywhere.
+Una librería interesante polyfill es [core js](https://github.com/zloirock/core-js), que brinda una amplia gama de catacterísticas y te permite incluir solo las que necesitas.
+
+## Resumen
+
+En este artículo queremos motivarte a estudiar las características más modernas y hasta experimentales del lenguaje, incluso si aún no tienen buen soporte en los intérpretes JavaScript.
+
+Pero no olvides usar transpiladores (si usas sintaxis u operadores modernos) y polyfills (para añadir funciones que pueden estar ausentes). Ellos se asegurarán de que el código funcione.
+
+Por ejemplo, cuando estés más familiarizado con JavaScript puedes configurar la construcción de código basado en [webpack](https://webpack.js.org/) con el plugin [babel-loader](https://github.com/babel/babel-loader).
+
+Buenos recursos que muestran el estado actual de soporte para varias característica:
+- <https://compat-table.github.io/compat-table/es6/> - para JavaScript puro.
+- <https://caniuse.com/> - para funciones relacionadas al navegador.
+
+P.S. Google Chrome usualmente es el más actualizado con las características del lenguaje, pruébalo si algún demo del tutorial falla. Aunque la mayoría de los demos funciona con cualquier navegador moderno.
+

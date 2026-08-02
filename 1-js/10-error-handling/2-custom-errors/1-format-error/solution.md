@@ -2,15 +2,15 @@
 class FormatError extends SyntaxError {
   constructor(message) {
     super(message);
-    this.name = "FormatError";
+    this.name = this.constructor.name;
   }
 }
 
-let err = new FormatError("formatting error");
+let err = new FormatError("error de formato");
 
-alert( err.message ); // formatting error
+alert( err.message ); // error de formato
 alert( err.name ); // FormatError
-alert( err.stack ); // stack
+alert( err.stack ); // pila
 
 alert( err instanceof SyntaxError ); // true
 ```

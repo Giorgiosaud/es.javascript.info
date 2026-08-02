@@ -1,23 +1,23 @@
-# Form properties and methods
+# Propiedades y Métodos de Formularios
 
-Forms and control elements, such as `<input>` have a lot of special properties and events.
+Los formularios y controles, como `<input>`, tienen muchos eventos y propiedades especiales.
 
-Working with forms can be much more convenient if we know them.
+Trabajar con formularios será mucho más conveniente cuando los aprendamos.
 
-## Navigation: form and elements
+## Navegación: Formularios y elementos
 
-Document forms are members of the special collection `document.forms`.
+Los formularios del documento son miembros de la colección especial `document.forms`.
 
-That's a *named* collection: we can use both the name and the number to get the form.
+Esa es la llamada "Colección nombrada": es ambas cosas, nombrada y ordenada. Podemos usar el nombre o el número  en el documento para conseguir el formulario.
 
 ```js no-beautify
-document.forms.my - the form with name="my"
-document.forms[0] - the first form in the document
+document.forms.my; // el formulario con name="my"
+document.forms[0]; // el primer formulario en el documento
 ```
 
-When we have a form, then any element is available in the named collection `form.elements`.
+Cuando tenemos un formulario, cualquier elemento se encuentra disponible en la colección nombrada `form.elements`.
 
-For instance:
+Por ejemplo:
 
 ```html run height=40
 <form name="my">
@@ -26,19 +26,19 @@ For instance:
 </form>
 
 <script>
-  // get the form
-  let form = document.forms.my; // <form name="my"> element
+  // obtención del formulario
+  let form = document.forms.my; // elemento <form name="my">
 
   // get the element
-  let elem = form.elements.one; // <input name="one"> element
+  let elem = form.elements.one; // elemento <input name="one">
 
   alert(elem.value); // 1
 </script>
 ```
 
-There may be multiple elements with the same name, that's often the case with radio buttons.
+Puede haber múltiples elementos con el mismo nombre. Esto es típico en el caso de los botones de radio y checkboxes.
 
-In that case `form.elements[name]` is a collection, for instance:
+En ese caso `form.elements[name]` es una *colección*. Por ejemplo:
 
 ```html run height=40
 <form>
@@ -51,17 +51,19 @@ let form = document.forms[0];
 
 let ageElems = form.elements.age;
 
-alert(ageElems[0].value); // 10, the first input value
+*!*
+alert(ageElems[0]); // [object HTMLInputElement]
+*/!*
 </script>
 ```
 
-These navigation properties do not depend on the tag structure. All elements, no matter how deep they are in the form, are available in `form.elements`.
+Estas propiedades de navegación no dependen de la estructura de las etiquetas. Todos los controles, sin importar qué tan profundos se encuentren en el formulario, están disponibles en `form.elements`.
 
 
-````smart header="Fieldsets as \"subforms\""
-A form may have one or many `<fieldset>` elements inside it. They also support the `elements` property.
+````smart header="Fieldsets como \"sub-formularios\""
+Un formulario puede tener uno o varios elementos `<fieldset>` dentro. Estos también tienen la propiedad `elements` que lista los controles del formulario dentro de ellos.
 
-For instance:
+Por ejemplo:
 
 ```html run height=80
 <body>
@@ -79,7 +81,7 @@ For instance:
     let fieldset = form.elements.userFields;
     alert(fieldset); // HTMLFieldSetElement
 
-    // we can get the input both from the form and from the fieldset
+    // podemos obtener el input por su nombre tanto desde el formulario como desde el fieldset
     alert(fieldset.elements.login == form.elements.login); // true
 */!*
   </script>
@@ -87,14 +89,14 @@ For instance:
 ```
 ````
 
-````warn header="Shorter notation: `form.name`"
-There's a shorter notation: we can access the element as `form[index/name]`.
+````warn header="Notación corta: `form.name`"
+Hay una notación corta: podemos acceder el elemento como `form[index/name]`.
 
-Instead of `form.elements.login` we can write `form.login`.
+En otras palabras, en lugar de `form.elements.login` podemos escribir `form.login`.
 
-That also works, but there's a minor issue: if we access an element, and then change its `name`, then it is still available under the old name (as well as under the new one).
+Esto también funciona, pero tiene un error menor: si accedemos un elemento, y cambiamos su `name`, se mantendrá disponible mediante el nombre anterior (así como mediante el nuevo).
 
-That's easy to see in an example:
+Esto es fácil de ver en un ejemplo:
 
 ```html run height=40
 <form id="form">
@@ -102,35 +104,34 @@ That's easy to see in an example:
 </form>
 
 <script>
-  alert(form.elements.login == form.login); // true, the same <input>
+  alert(form.elements.login == form.login); // true, el mismo <input>
 
-  form.login.name = "username"; // change the name of the input
+  form.login.name = "username"; // cambiamos el nombre el <input>
 
-  // form.elements updated the name:
+  // form.elements actualiza el nombre:
   alert(form.elements.login); // undefined
   alert(form.elements.username); // input
 
 *!*
-  // the direct access now can use both names: the new one and the old one
+  // form permite ambos nombres: el nuevo y el viejo
   alert(form.username == form.login); // true
 */!*
 </script>
 ```
 
-That's usually not a problem, because we rarely change names of form elements.
+Esto usualmente no es un problema, porque raramente se cambian los nombres de los elementos de un formulario.
 
 ````
 
-## Backreference: element.form
+## Referencia inversa: element.form
 
-For any element, the form is available as `element.form`. So a form references all elements, and elements
-reference the form.
+Para cualquier elemento, el formulario está disponible como `element.form`. Así que un formulario referencia todos los elementos, y los elementos referencian el formulario.
 
-Here's the picture:
+Aquí la imagen:
 
 ![](form-navigation.svg)
 
-For instance:
+Por ejemplo:
 
 ```html run height=40
 <form id="form">
@@ -148,44 +149,44 @@ For instance:
 </script>
 ```
 
-## Form elements
+## Elementos del formulario
 
-Let's talk about form controls, pay attention to their specific features.
+Hablemos de los controles de los formularios.
 
-### input and textarea
+### input y textarea
 
-Normally, we can access the value as `input.value` or `input.checked` for checkboxes.
+Podemos acceder sus valores como `input.value` (cadena) o `input.checked` (booleano) para casillas de verificación (checkboxes) y botones de opción (radio buttons).
 
-Like this:
+De esta manera:
 
 ```js
 input.value = "New value";
 textarea.value = "New text";
 
-input.checked = true; // for a checkbox or radio button
+input.checked = true; // para checkboxes o radios
 ```
 
-```warn header="Use `textarea.value`, not `textarea.innerHTML`"
-Please note that we should never use `textarea.innerHTML`: it stores only the HTML that was initially on the page, not the current value.
+```warn header="Usa `textarea.value`, no `textarea.innerHTML`"
+Observa que incluso aunque `<textarea>...</textarea>` contenga su valor como HTML anidado, nunca deberíamos usar `textarea.innerHTML` para acceder a él.
+
+Esto solo guarda el HTML que había inicialmente en la página, no su valor actual.
 ```
 
-### select and option
+### select y option
 
-A `<select>` element has 3 important properties:
+Un elemento `<select>` tiene 3 propiedades importantes:
 
-1. `select.options` -- the collection of `<option>` elements,
-2. `select.value` -- the value of the chosen option,
-3. `select.selectedIndex` -- the number of the selected option.
+1. `select.options` -- la colección de subelementos `<option>`,
+2. `select.value` -- el valor del `<option>` seleccionado actualmente, y
+3. `select.selectedIndex` -- el número del `<option>` seleccionado actualmente.
 
-So we have three ways to set the value of a `<select>`:
+Ellas proveen tres formas diferentes de asignar un valor para un elemento `<select>`:
 
-1. Find the needed `<option>` and set `option.selected` to `true`.
-2. Set `select.value` to the value.
-3. Set `select.selectedIndex` to the number of the option.
+1. Encontrar el elemento `<option>` correspondiente (por ejemplo entre `select.options`) y asignar a su `option.selected` un `true`.
+2. Si conocemos un nuevo valor: Asignar tal valor a `select.value`.
+3. Si conocemos el nuevo número de opción: Asignar tal número a `select.selectedIndex`.
 
-The first way is the most obvious, but `(2)` and `(3)` are usually more convenient.
-
-Here is an example:
+Aquí hay un ejemplo de los tres métodos:
 
 ```html run
 <select id="select">
@@ -195,16 +196,19 @@ Here is an example:
 </select>
 
 <script>
-  // all three lines do the same thing
+  // las tres líneas hacen lo mismo
   select.options[2].selected = true;
   select.selectedIndex = 2;
   select.value = 'banana';
+  // Recuerda que las opciones comienzan en cero, así que index 2 significa la tercera opción.
 </script>
 ```
 
-Unlike most other controls, `<select multiple>` allows multiple choice. In that case we need to walk over `select.options` to get all selected values.
+A diferencia de la mayoría de controles, `<select>` permite seleccionar múltiples opciones a la vez si tiene el atributo `multiple`. Esta característica es raramente utilizada. 
 
-Like this:
+En ese caso, necesitamos usar la primera forma: Añade/elimina la propiedad `selected` de los subelementos `<option>`.
+
+Podemos obtener su colección como `select.options`, por ejemplo:
 
 ```html run
 <select id="select" *!*multiple*/!*>
@@ -214,7 +218,7 @@ Like this:
 </select>
 
 <script>
-  // get all selected values from multi-select
+  // obtener todos los valores seleccionados del multi-select
   let selected = Array.from(select.options)
     .filter(option => option.selected)
     .map(option => option.value);
@@ -223,64 +227,72 @@ Like this:
 </script>
 ```
 
-The full specification of the `<select>` element is available at <https://html.spec.whatwg.org/multipage/forms.html#the-select-element>.
+La especificación completa del elemento `<select>` está disponible en la especificación <https://html.spec.whatwg.org/multipage/forms.html#the-select-element>.
 
 ### new Option
 
-In the specification of [the option element](https://html.spec.whatwg.org/multipage/forms.html#the-option-element) there's a nice short syntax to create `<option>` elements:
+En la [especificación](https://html.spec.whatwg.org/multipage/forms.html#the-option-element) hay una sintaxis muy corta para crear elementos `<option>`:
 
 ```js
 option = new Option(text, value, defaultSelected, selected);
 ```
 
-Parameters:
+Esta sintaxis es opcional. Podemos usar `document.createElement('option')` y asignar atributos manualmente. Aún puede ser más corta, aquí los parámetros:
 
-- `text` -- the text inside the option,
-- `value` -- the option value,
-- `defaultSelected` -- if `true`, then `selected` attribute is created,
-- `selected` -- if `true`, then the option is selected.
+- `text` -- el texto dentro del option,
+- `value` -- el valor del option,
+- `defaultSelected` -- si es `true`, entonces se le crea el atributo HTML `selected`,
+- `selected` -- si es `true`, el option se selecciona.
 
-For instance:
+La diferencia entre `defaultSelected` y `selected` es que `defaultSelected` define si el atributo HTML (el que obtenemos con `option.getAttribute('selected')`), mientras que `selected` define si el option está seleccionado o no en el DOM.
+
+En la práctica, uno debería usualmente establecer _ambos_ valores en `true` o `false`. O simplemente omitirlos, quedarán con el predeterminado `false`.
+
+Por ejemplo, aquí creamos un nuevo Option "unselected":
 
 ```js
 let option = new Option("Text", "value");
-// creates <option value="value">Text</option>
+// crea <option value="value">Text</option>
 ```
 
-The same element selected:
+El mismo elemento, pero seleccionado:
 
 ```js
 let option = new Option("Text", "value", true, true);
 ```
 
-```smart header="Additional properties of `<option>`"
-Option elements have additional properties:
+Los elementos Option tienen propiedades:
 
-`selected`
-: Is the option selected.
+`option.selected`
+: Es el option seleccionado.
 
-`index`
-: The number of the option among the others in its `<select>`.
+`option.index`
+: El número del option respecto a los demás en su `<select>`.
 
-`text`
-: Text content of the option (seen by the visitor).
-```
+`option.text`
+: El contenido del option (visto por el visitante).
 
-## Summary
+## Referencias
 
-Form navigation:
+- Especificación: <https://html.spec.whatwg.org/multipage/forms.html>.
+
+## Resumen
+
+Navegación de formularios:
 
 `document.forms`
-: A form is available as `document.forms[name/index]`.
+: Un formulario está disponible como `document.forms[name/index]`.
 
-`form.elements`  
-: Form elements are available as `form.elements[name/index]`, or can use just `form[name/index]`. The `elements` property also works for `<fieldset>`.
+`form.elements`
+: Los elementos del formulario están disponibles como `form.elements[name/index]`, o puedes usar solo `form[name/index]`. La propiedad `elements` también funciona para los `<fieldset>`.
 
 `element.form`
-: Elements reference their form in the `form` property.
+: Los elementos referencian a su formulario en la propiedad `form`.
 
-Value is available as `input.value`, `textarea.value`, `select.value` etc, or `input.checked` for checkboxes and radio buttons.
+El valor está disponible con `input.value`, `textarea.value`, `select.value` etc.  Para checkboxes y radios, usa `input.checked` para determinar si el valor está seleccionado.
 
-For `<select>` we can also get the value by the index `select.selectedIndex` or through the options collection `select.options`. The full specification of this and other elements is at <https://html.spec.whatwg.org/multipage/forms.html>.
+Para `<select>` también podemos obtener el valor con el índice `select.selectedIndex` o a través de la colección de opciones `select.options`.
 
-These are the basics to start working with forms. In the next chapter we'll cover `focus` and `blur` events that may occur on any element, but are mostly handled on forms.
+Esto es lo básico para empezar a trabajar con formularios. Conoceremos muchos ejemplos más adelante en el tutorial.
+
+En el siguiente capítulo vamos a hablar sobre los eventos `focus` y `blur` que pueden ocurrir en cualquier elemento, pero son manejados mayormente en formularios.

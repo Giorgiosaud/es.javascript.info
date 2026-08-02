@@ -1,37 +1,37 @@
-# Scrolling
+# Desplazamiento
 
-Scroll events allow to react on a page or element scrolling. There are quite a few good things we can do here.
+El evento `scroll` permite reaccionar al desplazamiento de una página o elemento. Hay bastantes cosas buenas que podemos hacer aquí.
 
-For instance:
-- Show/hide additional controls or information depending on where in the document the user is.
-- Load more data when the user scrolls down till the end of the page.
+Por ejemplo:
+- Mostrar/ocultar controles o información adicional según el lugar del documento en el que se encuentre el/la usuario/a.
+- Cargar más datos cuando el/la usuario/a se desplaza hacia abajo hasta el final del documento. 
 
-Here's a small function to show the current scroll:
+Aquí hay una pequeña función para mostrar el desplazamiento actual:
 
 ```js autorun
 window.addEventListener('scroll', function() {
-  document.getElementById('showScroll').innerHTML = pageYOffset + 'px';
+  document.getElementById('showScroll').innerHTML = window.pageYOffset + 'px';
 });
 ```
 
 ```online
 In action:
 
-Current scroll = <b id="showScroll">scroll the window</b>
+Desplazamiento actual = <b id="showScroll">Desplazamiento de la ventana</b>
 ```
 
-The `scroll` event works both on the `window` and on scrollable elements.
+El evento `scroll` funciona tanto en `window` como en los elementos desplazables.
 
-## Prevent scrolling
+## Evitar el desplazamiento
 
-How do we make something unscrollable? We can't prevent scrolling by using `event.preventDefault()` in `onscroll` listener, because it triggers *after* the scroll has already happened.
+¿Qué hacemos para que algo no se pueda desplazar?
 
-But we can prevent scrolling by `event.preventDefault()` on an event that causes the scroll.
+No podemos evitar el desplazamiento utilizando `event.preventDefault()` oyendo al evento `onscroll`, porque este se activa *después* de que el desplazamiento haya ocurrido.
 
-For instance:
-- `wheel` event -- a mouse wheel roll (a "scrolling" touchpad action generates it too).
-- `keydown` event for `key:pageUp` and `key:pageDown`.
+Pero podemos prevenir el desplazamiento con `event.preventDefault()` en un evento que cause el desplazamiento, por ejemplo en el evento `keydown` para `key:pageUp` y `key:pageDown`.
 
-Sometimes that may help. But there are more ways to scroll, so it's quite hard to handle all of them. So it's more reliable to use CSS to make something unscrollable, like `overflow` property.
+Si añadimos un manejador de eventos a estos eventos y un `event.preventDefault()` en el manejador, entonces el desplazamiento no se iniciará.
 
-Here are few tasks that you can solve or look through to see the applications on `onscroll`.
+Hay muchas maneras de iniciar un desplazamiento, la más fiable es usar CSS, la propiedad `overflow`.
+
+Aquí hay algunas tareas que puede resolver o revisar para ver aplicaciones de `onscroll`.

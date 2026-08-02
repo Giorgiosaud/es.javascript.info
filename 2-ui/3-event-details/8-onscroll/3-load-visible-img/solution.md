@@ -1,11 +1,13 @@
-The `onscroll` handler should check which images are visible and show them.
+El manejador `onscroll` debería comprobar qué imágenes son visibles y mostrarlas.
 
-We also may want to run it when the page loads, to detect immediately visible images prior to any scrolling and load them.
+También queremos que se ejecute cuando se cargue la página, para detectar las imágenes visibles inmediatamente y cargarlas.
 
-If we put it at the `<body>` bottom, then it runs when the page content is loaded.
+El código debería ejecutarse cuando se cargue el documento, para que tenga acceso a su contenido.
+
+O ponerlo en la parte inferior del `<body>`:
 
 ```js
-// ...the page content is above...
+// ...el contenido de la página está arriba...
 
 function isVisible(elem) {
 
@@ -13,11 +15,29 @@ function isVisible(elem) {
 
   let windowHeight = document.documentElement.clientHeight;
 
-  // top elem edge is visible OR bottom elem edge is visible
+  // ¿El borde superior del elemento es visible?
   let topVisible = coords.top > 0 && coords.top < windowHeight;
+
+  // ¿El borde inferior del elemento es visible?
   let bottomVisible = coords.bottom < windowHeight && coords.bottom > 0;
 
   return topVisible || bottomVisible;
+}
+```
+
+La función `showVisible()` utiliza el control de visibilidad, implementado por `isVisible()`, para cargar imágenes visibles:
+
+```js
+function showVisible() {
+  for (let img of document.querySelectorAll('img')) {
+    let realSrc = img.dataset.src;
+    if (!realSrc) continue;
+
+    if (isVisible(img)) {
+      img.src = realSrc;
+      img.dataset.src = '';
+    }
+  }
 }
 
 *!*
@@ -26,6 +46,4 @@ window.onscroll = showVisible;
 */!*
 ```
 
-For visible images we can take `img.dataset.src` and assign it to `img.src` (if not did it yet).
-
-P.S. The solution also has a variant of `isVisible` that "pre-loads" images that are within 1 page  above/below (the page height is `document.documentElement.clientHeight`).
+P.D. La solución tiene una variante de `isVisible` que "precarga" imágenes que están dentro de 1 página por encima/debajo del desplazamiento del documento actual.

@@ -4,7 +4,13 @@ Las curvas de Bézier se utilizan en gráficos por ordenador para dibujar formas
 
 En realidad, son algo muy sencillo, vale la pena estudiarlos una vez y luego sentirse cómodo en el mundo de los gráficos vectoriales y las animaciones avanzadas.
 
-## Puntos de control
+```smart header="Un poco de teoría, por favor"
+Este artículo brinda una base teórica, pero muy necesaria, de lo que son las curvas Bezier; mientras que el [próximo](info:css-animations#bezier-curve) muestra cómo podemos usarlas en animaciones CSS.
+
+Por favor toma tu tiempo en leer y entender el concepto, te servirá bien.
+```
+
+## Puntos de Control
 
 Una [curva de Bézier](https://es.wikipedia.org/wiki/Curva_de_B%C3%A9zier) está definida por puntos de control.
 
@@ -174,7 +180,7 @@ En lugar de <code>x<sub>1</sub>, y<sub>1</sub>, x<sub>2</sub>, y<sub>2</sub>, x<
 Por ejemplo, si los puntos de control son  `(0,0)`, `(0.5, 1)` y `(1, 0)`, las ecuaciones se convierten en:
 
 - <code>x = (1−t)<sup>2</sup> * 0 + 2(1−t)t * 0.5 + t<sup>2</sup> * 1 = (1-t)t + t<sup>2</sup> = t</code>
-- <code>y = (1−t)<sup>2</sup> * 0 + 2(1−t)t * 1 + t<sup>2</sup> * 0 = 2(1-t)t = –t<sup>2</sup> + 2t</code>
+- <code>y = (1−t)<sup>2</sup> * 0 + 2(1−t)t * 1 + t<sup>2</sup> * 0 = 2(1-t)t = –2t<sup>2</sup> + 2t</code>
 
 Ahora como `t` se ejecuta desde `0` a `1`, el conjunto de valores `(x,y)` para cada `t` forman la curva para dichos puntos de control.
 
@@ -184,8 +190,8 @@ Las curvas de Bézier se definen por sus puntos de control.
 
 Vimos dos definiciones de curvas de Bézier:
 
-1. Utilizando una fórmula matemática.
-2. Utilizando un proceso de dibujo: el algoritmo de De Casteljau.
+1. Utilizando un proceso de dibujo: el algoritmo de De Casteljau.
+2. Utilizando una fórmula matemática.
 
 Buenas propiedades de las curvas de Bezier:
 

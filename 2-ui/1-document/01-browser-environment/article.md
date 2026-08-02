@@ -1,42 +1,44 @@
 # Entorno del navegador, especificaciones
 
-El lenguaje JavaScript fue creado inicialmente para los navegadores web. Desde entonces, ha evolucionado y se ha convertido en un lenguaje con muchos usos y plataformas.
+El lenguaje JavaScript fue creado inicialmente para los navegadores web. Desde entonces, ha evolucionado en un lenguaje con muchos usos y plataformas.
 
-Una plataforma puede ser un navegador, un servidor web, una lavadora u otro *host (anfitrión)*. Cada uno de ellos proporciona una funcionalidad específica. La especificación de JavaScript lo llama *entorno host*.
+Una plataforma puede ser un navegador, un servidor web u otro *host* ("anfitrión"); incluso una máquina de café "inteligente", si puede ejecutar JavaScript. Cada uno de ellos proporciona una funcionalidad específica de la plataforma. La especificación de JavaScript llama a esto *entorno de host*.
 
-Un entorno host proporciona objetos específicos de la plataforma y funciones adicionales al núcleo del lenguaje. Los navegadores web proporcionan un medio para controlar las páginas web. Node.JS proporciona características del lado del servidor, y así sucesivamente.
+Un entorno host proporciona sus propios objetos y funciones adicionales al núcleo del lenguaje. Los navegadores web proporcionan un medio para controlar las páginas web. Node.js proporciona características del lado del servidor, etc.
 
 Aquí tienes una vista general de lo que tenemos cuando JavaScript se ejecuta en un navegador web:
 
 ![](windowObjects.svg)
 
-Hay un objeto "raíz" llamado `window`.Tiene dos roles:
+Hay un objeto "raíz" llamado `window`. Tiene dos roles:
 
-1. Primero, es un objeto global para el código JavaScript, como se describe en el capítulo [Objeto global](/global-object).
-2. En segundo lugar, representa la "ventana del navegador" y proporciona métodos para controlarla.
+1. Primero, es un objeto global para el código JavaScript, como se describe en el capítulo <info:global-object>.
+2. Segundo, representa la "ventana del navegador" y proporciona métodos para controlarla.
 
-Por ejemplo, aquí lo usamos como un objeto global:
+Por ejemplo, podemos usarlo como objeto global:
 
-```js run
+```js run global
 function sayHi() {
   alert("Hola");
 }
 
-// Las funciones globales son accesibles como propiedades de window
+// Las funciones globales son métodos del objeto global:
 window.sayHi();
 ```
 
-Y aquí lo usamos como una ventana del navegador, para ver la altura de la ventana:
+Y podemos usarlo como una ventana del navegador. Para ver la altura de la ventana:
 
 ```js run
 alert(window.innerHeight); // altura interior de la ventana
 ```
 
-Hay más métodos y propiedades específicos de `window`, los cubriremos más adelante.
+Hay más métodos y propiedades específicos de `window`, los que cubriremos más adelante.
 
-## Modelo de Objetos del Documento (DOM)
+## DOM (Modelo de Objetos del Documento)
 
-El objeto `document` da acceso al contenido de la página. Con él podemos cambiar o crear cualquier cosa en la página.
+Document Object Model, o DOM, representa todo el contenido de la página como objetos que pueden ser modificados.
+
+El objeto `document` es el punto de entrada a la página. Con él podemos cambiar o crear cualquier cosa en la página.
 
 Por ejemplo:
 ```js run
@@ -47,74 +49,65 @@ document.body.style.background = "red";
 setTimeout(() => document.body.style.background = "", 1000);
 ```
 
-Aquí usamos `document.body.style`, pero hay muchos, muchos más. Las propiedades y métodos se describen en la especificación. Sucede que hay dos grupos de trabajo que lo desarrollan:
-
-1. [W3C](https://es.wikipedia.org/wiki/World_Wide_Web_Consortium) -- la documentación se encuentra en <https://www.w3.org/TR/dom>.
-2. [WhatWG](https://es.wikipedia.org/wiki/Web_Hypertext_Application_Technology_Working_Group), publicado en <https://dom.spec.whatwg.org>.
-
-Como es de esperar, los dos grupos no siempre están de acuerdo, así que es como si tuviéramos dos conjuntos de estándares. Pero son muy similares y eventualmente las cosas se fusionan. La documentación que puede encontrar en los recursos dados es muy similar, con aproximadamente un 99% de coincidencia. Hay diferencias muy pequeñas que probablemente no notarás.
-
-Personalmente, encuentro <https://dom.spec.whatwg.org> más agradable de usar.
-
-En el pasado lejano, no existía ninguna norma en absoluto: cada navegador lo implementaba como quería. Diferentes navegadores tenían diferentes métodos y propiedades para la misma cosa, y los desarrolladores tenían que escribir un código diferente para cada uno de ellos. Tiempos oscuros, desordenados.
-
-Incluso ahora, podemos encontrarnos con código antiguo que usa propiedades específicas del navegador y soluciona las incompatibilidades. Pero, en este tutorial usaremos cosas modernas: no hay necesidad de aprender cosas antiguas hasta que realmente lo necesites (es muy probable que no lo hagas).
-
-Luego apareció el estándar DOM, en un intento de llevar a todos a un acuerdo. La primera versión fue "DOM Level 1", luego fue extendida por DOM Level 2, luego DOM Level 3, y ahora llegó a DOM Level 4. La gente del grupo WhatWG se cansó de los números de versión y lo están llamando simplemente "DOM", sin un numero. Así que haremos lo mismo.
+Aquí usamos `document.body.style`, pero hay muchos, muchos más. Las propiedades y métodos se describen en la especificación: [DOM Living Standard](https://dom.spec.whatwg.org).
 
 ```smart header="DOM no es solo para navegadores"
-La especificación DOM explica la estructura de un documento y proporciona objetos para manipularlo. Hay instrumentos que no son del navegador que también lo utilizan.
+La especificación DOM explica la estructura de un documento y proporciona objetos para manipularlo. Hay instrumentos que no son del navegador que también usan DOM.
 
-Por ejemplo, las herramientas del lado del servidor que descargan páginas HTML y las procesan utilizan el DOM. Sin embargo, pueden soportar solo una parte de la especificación.
+Por ejemplo, los scripts del lado del servidor que descargan páginas HTML y las procesan, también pueden usar DOM. Sin embargo, podrían admitir solamente parte de la especificación.
 ```
 
 ```smart header="CSSOM para los estilos"
-Las reglas CSS y las hojas de estilo no están estructuradas como HTML. Hay una especificación [CSSOM](https://www.w3.org/TR/cssom-1/) separada, que explica cómo se representan como objetos, y cómo leerlos y escribirlos.
+También hay una especificación separada, [CSS Object Model (CSSOM)](https://www.w3.org/TR/cssom-1/) para las reglas y hojas de estilo CSS, que explica cómo se representan como objetos y cómo leerlos y escribirlos.
 
-CSSOM se usa junto con DOM cuando modificamos las reglas de estilo para el documento. En la práctica, sin embargo, rara vez se requiere CSSOM, porque generalmente las reglas de CSS son estáticas. Rara vez necesitamos agregar/eliminar reglas CSS desde JavaScript, por lo que no lo cubriremos ahora.
+CSSOM se usa junto con DOM cuando modificamos las reglas de estilo para el documento. Sin embargo, en la práctica rara vez se requiere CSSOM, porque rara vez necesitamos modificar las reglas CSS desde JavaScript (generalmente solo agregamos y eliminamos clases CSS, no modificamos sus reglas CSS), pero eso también es posible.
 ```
 
-## BOM (parte de la especificación HTML)
+## BOM (Modelo de Objetos del Navegador)
 
-El Modelo de Objetos del Navegador (BOM) son objetos adicionales proporcionados por el navegador (entorno host) para trabajar con todo excepto el documento.
+El Modelo de Objetos del Navegador (Browser Object Model, BOM) son objetos adicionales proporcionados por el navegador (entorno host) para trabajar con todo excepto el documento.
 
 Por ejemplo:
 
-- El objeto [navigator](https://developer.mozilla.org/es/docs/Web/API/Window/navigator), proporciona información sobre el navegador y el sistema operativo. Hay muchas propiedades, pero las dos más conocidas son: `navigator.userAgent` -- sobre el navegador actual, y `navigator.platform` -- sobre la plataforma (puede ayudar a diferenciar entre Windows/Linux/Mac, etc.).
-- El objeto [location](https://developer.mozilla.org/es/docs/Web/API/Window/location), nos permite leer la URL actual y puede redirigir el navegador a uno nuevo.
+- El objeto [navigator](https://developer.mozilla.org/es/docs/Web/API/Window/navigator) proporciona información sobre el navegador y el sistema operativo. Hay muchas propiedades, pero las dos más conocidas son: `navigator.userAgent`: acerca del navegador actual, y `navigator.platform`: acerca de la plataforma (ayuda a distinguir Windows/Linux/Mac, etc.).
+- El objeto [location](https://developer.mozilla.org/es/docs/Web/API/Window/location) nos permite leer la URL actual y puede redirigir el navegador a una nueva.
 
 Aquí vemos cómo podemos usar el objeto `location`:
 
 ```js run
 alert(location.href); // muestra la URL actual
-if (confirm("Go to wikipedia?")) {
+if (confirm("Ir a wikipedia?")) {
   location.href = "https://wikipedia.org"; // redirigir el navegador a otra URL
 }
 ```
 
-Las funciones `alert/confirm/prompt` también forman parte de BOM: no están directamente relacionadas con el documento, sino que representan métodos de comunicación puros con el usuario.
+Las funciones `alert/confirm/prompt` también forman parte de BOM: no están directamente relacionadas con el documento, sino que representan métodos puros de comunicación del navegador con el usuario.
 
-```smart header="Especificación de HTML"
+```smart header="Especificaciones"
 BOM es la parte general de la especificación de [HTML specification](https://html.spec.whatwg.org).
 
-Sí, oíste bien. La especificación HTML en <https://html.spec.whatwg.org> no solo trata sobre el "lenguaje HTML" (etiquetas, atributos), sino que también cubre un montón de objetos, métodos y extensiones DOM específicas del navegador. Eso es "HTML en términos generales".
+Sí, oíste bien. La especificación HTML en <https://html.spec.whatwg.org> no solo trata sobre el "lenguaje HTML" (etiquetas, atributos), sino que también cubre un montón de objetos, métodos y extensiones DOM específicas del navegador. Eso es "HTML en términos generales". Además, algunas partes tienen especificaciones adicionales listadas en <https://spec.whatwg.org>.
 ```
 
 ## Resumen
 
-Hablando de estándares, tenemos:
+En términos de estándares, tenemos:
 
 La especificación del DOM
-: Describe la estructura del documento, las manipulaciones y los eventos, consulte <https://dom.spec.whatwg.org>.
+: Describe la estructura del documento, las manipulaciones y los eventos; consulte <https://dom.spec.whatwg.org>.
 
 La especificación del CSSOM
-: Describe las hojas de estilo y las reglas de estilo, las manipulaciones con ellas y su vinculación a los documentos, consulte <https://www.w3.org/TR/cssom-1/>.
+: Describe las hojas de estilo y las reglas de estilo, las manipulaciones con ellas y su vínculo a los documentos. Consulte <https://www.w3.org/TR/cssom-1/>.
 
 La especificación del HTML
-: Describe el lenguaje HTML (por ejemplo, etiquetas) y también el BOM (modelo de objeto del navegador) -- varias funciones del navegador: `setTimeout`, `alert`, `location`, etc., consulte <https://html.spec.whatwg.org>. Toma la especificación DOM y la extiende con muchas propiedades y métodos adicionales.
+: Describe el lenguaje HTML (por ejemplo, etiquetas), y también el BOM (modelo de objeto del navegador) que describe varias funciones del navegador como `setTimeout`, `alert`, `location`, etc. Esta toma la especificación DOM y la extiende con muchas propiedades y métodos adicionales. Consulta <https://html.spec.whatwg.org>.
 
-Ahora nos concentraremos en aprender el DOM, porque juega un papel central en la interfaz de usuario.
+Adicionalmente, algunas clases son descritas separadamente en <https://spec.whatwg.org/>.
 
-Ten en cuenta los enlaces anteriores, ya que hay tantas cosas que aprender que es imposible cubrir y recordar todo.
+Ten en cuenta los enlaces anteriores, ya que hay tantas cosas que es imposible cubrir y recordar todo.
 
 Cuando desees leer sobre una propiedad o un método, el manual de Mozilla en <https://developer.mozilla.org/es/search> es un buen recurso, pero leer las especificaciones correspondientes puede ser mejor: es más complejo y hay más para leer, pero hará que su conocimiento de los fundamentos sea sólido y completo.
+
+Para encontrar algo, a menudo es conveniente usar una búsqueda como "WHATWG [término]" o "MDN [término]". Por ejemplo <https://google.com?q=whatwg+localstorage>, <https://google.com?q=mdn+localstorage>.
+
+Ahora nos concentraremos en aprender el DOM, porque `document` juega el papel central en la interfaz de usuario.

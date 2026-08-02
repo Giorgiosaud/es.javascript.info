@@ -1,8 +1,8 @@
-Answer: **1 and 3**.
+Respuesta: **1 y 3**.
 
-Both commands result in adding the `text` "as text" into the `elem`.
+Ambos comandos agregan `text` "como texto" dentro de `elem`.
 
-Here's an example:
+Aquí el ejemplo:
 
 ```html run height=80
 <div id="elem1"></div>
@@ -12,7 +12,7 @@ Here's an example:
   let text = '<b>text</b>';
 
   elem1.append(document.createTextNode(text));
-  elem2.textContent = text;
-  elem3.innerHTML = text;
+  elem2.innerHTML = text;
+  elem3.textContent = text;
 </script>
 ```

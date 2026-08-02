@@ -1,27 +1,39 @@
-# Events: change, input, cut, copy, paste
+# Eventos: change, input, cut, copy, paste
 
-Let's discuss various events that accompany data updates.
+Veamos varios eventos que acompañan la actualización de datos.
 
-## Event: change
+## Evento: change
 
-The [change](http://www.w3.org/TR/html5/forms.html#event-input-change) event triggers when the element has finished changing.
+El evento `change` se activa cuando el elemento finaliza un cambio.
 
-For text inputs that means that the event occurs when it loses focus.
+Para ingreso de texto significa que el evento ocurre cuando se pierde foco en el elemento.
 
-For instance, while we are typing in the text field below -- there's no event. But when we move the focus somewhere else, for instance, click on a button -- there will be a `change` event:
+Por ejemplo, mientras estamos escribiendo en el siguiente cuadro de texto, no hay evento. Pero cuando movemos el focus (enfoque) a otro lado, por ejemplo hacemos click en un botón, entonces ocurre el evento `change`:
 
 ```html autorun height=40 run
 <input type="text" onchange="alert(this.value)">
 <input type="button" value="Button">
 ```
 
-For other elements: `select`, `input type=checkbox/radio` it triggers right after the selection changes.
+Para otros elementos: `select`, `input type=checkbox/radio` se dispara inmediatamente después de cambiar la opción seleccionada:
 
-## Event: input
+```html autorun height=40 run
+<select onchange="alert(this.value)">
+  <option value="">Select something</option>
+  <option value="1">Option 1</option>
+  <option value="2">Option 2</option>
+  <option value="3">Option 3</option>
+</select>
+```
 
-The `input` event triggers every time a value is modified.
 
-For instance:
+## Evento: input
+
+El evento `input` se dispara cada vez que un valor es modificado por el usuario.
+
+A diferencia de los eventos de teclado, ocurre con el cambio a cualquier valor, incluso aquellos que no involucran acciones de teclado: copiar/pegar con el mouse o usar reconocimiento de voz para dictar texto.
+
+Por ejemplo:
 
 ```html autorun height=40 run
 <input type="text" id="input"> oninput: <span id="result"></span>
@@ -32,48 +44,71 @@ For instance:
 </script>
 ```
 
-If we want to handle every modification of an `<input>` then this event is the best choice.
+Si queremos manejar cualquier modificación en un `<input>` entonces este evento es la mejor opción.
 
-Unlike keyboard events it works on any value change, even those that does not involve keyboard actions: pasting with a mouse or using speech recognition to dictate the text.
+Por otro lado, el evento `input` no se activa con entradas del teclado u otras acciones que no involucren modificar un valor, por ejemplo presionar las flechas de dirección `key:⇦` `key:⇨` mientras se está en el input.
 
-```smart header="Can't prevent anything in `oninput`"
-The `input` event occurs after the value is modified.
+```smart header="No podemos prevenir nada en oninput"
+El evento `input` se dispara después de que el valor es modificado.
 
-So we can't use `event.preventDefault()` there -- it's just too late, there would be no effect.
+Por lo tanto no podemos usar `event.preventDefault()` aquí, es demasiado tarde y no tendría efecto.
 ```
 
-## Events: cut, copy, paste
+## Eventos: cut, copy, paste
 
-These events occur on cutting/copying/pasting a value.
+Estos eventos ocurren al cortar/copiar/pegar un valor.
 
-They belong to [ClipboardEvent](https://www.w3.org/TR/clipboard-apis/#clipboard-event-interfaces) class and provide access to the data that is copied/pasted.
+Estos pertenecen a la clase [ClipboardEvent](https://www.w3.org/TR/clipboard-apis/#clipboard-event-interfaces) y dan acceso a los datos cortados/copiados/pegados.
 
-We also can use `event.preventDefault()` to abort the action.
+También podemos usar `event.preventDefault()` para cancelar la acción y que nada sea cortado/copiado/pegado.
 
-For instance, the code below prevents all such events and shows what we are trying to cut/copy/paste:
+El siguiente código también evita todo evento `cut/copy/paste` y muestra qué es los que estamos intentando cortar/copiar/pegar:
 
 ```html autorun height=40 run
 <input type="text" id="input">
 <script>
-  input.oncut = input.oncopy = input.onpaste = function(event) {
-    alert(event.type + ' - ' + event.clipboardData.getData('text/plain'));
-    return false;
+  input.onpaste = function(event) {
+    alert("paste: " + event.clipboardData.getData('text/plain'));
+    event.preventDefault();
+  };
+
+  input.oncut = input.oncopy = function(event) {
+    alert(event.type + '-' + document.getSelection());
+    event.preventDefault();
   };
 </script>
 ```
 
-Technically, we can copy/paste everything. For instance, we can copy a file in the OS file manager, and paste it.
+Nota que dentro de los manejadores `cut` y `copy`, llamar a `event.clipboardData.getData(...)` devuelve  un string vacío. Esto es porque el dato no está en el portapapeles aún. Y si usamos `event.preventDefault()` no será copiado en absoluto.
 
-There's a list of methods [in the specification](https://www.w3.org/TR/clipboard-apis/#dfn-datatransfer) to work with different data types, read/write to the clipboard.
+Por ello el ejemplo arriba usa `document.getSelection()` para obtener el texto seleccionado. Puedes encontrar más detalles acerca de selección en el artículo <info:selection-range>.
 
-But please note that clipboard is a "global" OS-level thing. Most browsers allow read/write access to the clipboard only in the scope of certain user actions for the safety. Also it is forbidden to create "custom" clipboard events in all browsers except Firefox.
+No solo es posible copiar/pegar texto, sino cualquier cosa. Por ejemplo, podemos copiar un archivo en el gestor de archivos del SO y pegarlo.
 
-## Summary
+Esto es porque `clipboardData` implementa la interfaz `DataTransfer`, usada comúnmente para "arrastrar y soltar" y "copiar y pegar". Ahora esto está fuera de nuestro objetivo, pero puedes encontrar sus métodos [en la especificación DataTransfer](https://html.spec.whatwg.org/multipage/dnd.html#the-datatransfer-interface).
 
-Data change events:
+Hay además una API asincrónica adicional para acceso al portapapeles: `navigator.clipboard`. Más en la especificación [Clipboard API and events](https://www.w3.org/TR/clipboard-apis/), [no soportado en Firefox](https://caniuse.com/async-clipboard).
 
-| Event | Description | Specials |
+### Restricciones de seguridad
+
+El portapapeles es algo a nivel "global" del SO. Un usuario puede alternar entre ventanas, copiar y pegar diferentes cosas, y el navegador no debería ver todo eso.
+
+Por ello la mayoría de los navegadores dan acceso al portapapeles únicamente bajo determinadas acciones del usuario, como copiar y pegar.
+
+Está prohibido generar eventos "personalizados" del portapapeles con `dispatchEvent` en todos los navegadores excepto Firefox. Incluso si logramos enviar tal evento, la especificación establece claramente que tal evento "sintético" no debe brindar acceso al portapapeles.
+
+Incluso si alguien decide guardar `event.clipboardData` en un manejador de evento para accederlo luego, esto no funcionará.
+
+Para reiterar, [event.clipboardData](https://www.w3.org/TR/clipboard-apis/#clipboardevent-clipboarddata) funciona únicamente en el contexto de manejadores de eventos iniciados por el usuario.
+
+Por otro lado, [navigator.clipboard](https://www.w3.org/TR/clipboard-apis/#h-navigator-clipboard) es una API más reciente, pensada para el uso en cualquier contexto. Esta pide autorización al usuario cuando la necesita.
+
+## Resumen
+
+Eventos de modificación de datos:
+
+| Evento | Descripción | Especiales |
 |---------|----------|-------------|
-| `change`| A value was changed. | For text inputs triggers on focus loss. |
-| `input` | For text inputs on every change. | Triggers immediately unlike `change`. |
-| `cut/copy/paste` | Cut/copy/paste actions. | The action can be prevented. The `event.clipboardData` property gives read/write access to the clipboard. |
+| `change`| Un valor fue cambiado. | En ingreso de texto, se dispara cuando el elemento pierde el foco |
+| `input` | Cada cambio de entrada de texto | Se dispara de inmediato con cada cambio, a diferencia de `change`. |
+| `cut/copy/paste` | Acciones cortar/copiar/pegar | La acción puede ser cancelada. La propiedad `event.clipboardData` brinda acceso al portapeles. Todos los navegadores excepto Firefox también soportan `navigator.clipboard`. |

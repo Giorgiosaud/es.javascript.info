@@ -1,22 +1,22 @@
 
-# Class basic syntax
+# Sintaxis básica de `class`
 
 ```quote author="Wikipedia"
-In object-oriented programming, a *class* is an extensible program-code-template for creating objects, providing initial values for state (member variables) and implementations of behavior (member functions or methods).
+En informática, una clase es una plantilla para la creación de objetos de datos según un modelo predefinido. Las clases se utilizan para representar entidades o conceptos, como los sustantivos en el lenguaje. Cada clase es un modelo que define un conjunto de variables —el estado—, y métodos apropiados para operar con dichos datos —el comportamiento—.
 ```
 
-In practice, we often need to create many objects of the same kind, like users, or goods or whatever.
+En la práctica a menudo necesitamos crear muchos objetos del mismo tipo: usuarios, bienes, lo que sea.
 
-As we already know from the chapter <info:constructor-new>, `new function` can help with that.
+Como ya sabemos del capítulo <info:constructor-new>, `new function` puede ayudar con eso.
 
-But in the modern JavaScript, there's a more advanced "class" construct, that introduces great new features which are useful for object-oriented programming.
+Pero en JavaScript moderno hay un constructor más avanzado, "class", que introduce características nuevas muy útiles para la programación orientada a objetos.
 
-## The "class" syntax
+## La sintaxis "class"
 
-The basic syntax is:
+La sintaxis básica es:
 ```js
 class MyClass {
-  // class methods
+  // métodos de clase
   constructor() { ... }
   method1() { ... }
   method2() { ... }
@@ -25,11 +25,11 @@ class MyClass {
 }
 ```
 
-Then `new MyClass()` creates a new object with all the listed methods.
+Entonces usamos `new MyClass()` para crear un objeto nuevo con todos los métodos listados.
 
-The `constructor()` method is called automatically by `new`, so we can initialize the object there.
+El método `constructor()` es llamado automáticamente por `new`, así podemos inicializar el objeto allí.
 
-For example:
+Por ejemplo:
 
 ```js run
 class User {
@@ -44,33 +44,33 @@ class User {
 
 }
 
-// Usage:
+// Uso:
 let user = new User("John");
 user.sayHi();
 ```
 
-When `new User("John")` is called:
-1. A new object is created.
-2. The `constructor` runs with the given argument and assigns `this.name` to it.
+Cuando se llama a `new User("John")`:
+1. Un objeto nuevo es creado.
+2. El `constructor` se ejecuta con el argumento dado y lo asigna a `this.name`.
 
-...Then we can call methods, such as `user.sayHi`.
+...Entonces podemos llamar a sus métodos, como `user.sayHi()`.
 
 
-```warn header="No comma between class methods"
-A common pitfall for novice developers is to put a comma between class methods, which would result in a syntax error.
+```warn header="No va una coma entre métodos de clase"
+Un tropiezo común en desarrolladores principiantes es poner una coma entre los métodos de clase, lo que resulta en un error de sintaxis.
 
-The notation here is not to be confused with object literals. Within the class, no commas are required.
+La notación aquí no debe ser confundida con la sintaxis de objeto literal. Dentro de la clase no se requieren comas.
 ```
 
-## What is a class?
+## ¿Qué es una clase?
 
-So, what exactly is a `class`? That's not an entirely  new language-level entity, as one might think.
+Entonces, ¿qué es exactamente `class`? No es una entidad completamente nueva a nivel de lenguaje como uno podría pensar.
 
-Let's unveil any magic and see what a class really is. That'll help in understanding many complex aspects.
+Desvelemos la magia y veamos lo que realmente es una clase. Ayudará a entender muchos aspectos complejos.
 
-In Javascript, a class is a kind of a function.
+En JavaScript, una clase es un tipo de función.
 
-Here, take a look:
+Veamos:
 
 ```js run
 class User {
@@ -78,25 +78,24 @@ class User {
   sayHi() { alert(this.name); }
 }
 
-// proof: User is a function
+// La prueba: User es una función
 *!*
 alert(typeof User); // function
 */!*
 ```
 
-What `class User {...}` construct really does is:
-1. Creates a function named `User`, that becomes the result of the class declaration.
-    - The function code is taken from the `constructor` method (assumed empty is we don't write such method).
-3. Stores all methods, such as `sayHi`, in `User.prototype`.
+Lo que la construcción `class User {...}` hace realmente es:
 
-Afterwards, for new objects, when we call a method, it's taken from the prototype, just as  described in the chapter <info:function-prototype>. So `new User` object has access to class methods.
+1. Crea una función llamada `User`, la que se vuelve el resultado de la declaración de la clase. El código de la función es tomado del método `constructor` (se asume vacío si no se escribe tal método).
+2. Almacena los métodos de clase, tales como `sayHi`, en `User.prototype`.
 
-We can illustrate the result of `class User` as:
+Después de que el objeto `new User` es creado, cuando llamamos a sus métodos estos son tomados del prototipo, tal como se describe en el capítulo <info:function-prototype>. Así el objeto tiene acceso a métodos de clase.
+
+Podemos ilustrar el resultado de la declaración de `class User` como:
 
 ![](class-user.svg)
 
-Here's the code to introspect it:
-
+Aquí el código para inspeccionarlo:
 
 ```js run
 class User {
@@ -104,50 +103,50 @@ class User {
   sayHi() { alert(this.name); }
 }
 
-// class is a function
+// una clase es una función
 alert(typeof User); // function
 
-// ...or, more precisely, the constructor method
+// ...o, más precisamente, el método constructor
 alert(User === User.prototype.constructor); // true
 
-// The methods are in User.prototype, e.g:
-alert(User.prototype.sayHi); // alert(this.name);
+// Los métodos están en User.prototype, por ejemplo:
+alert(User.prototype.sayHi); // el código del método sayHi
 
-// there are exactly two methods in the prototype
+// Hay exactamente dos métodos en el prototipo
 alert(Object.getOwnPropertyNames(User.prototype)); // constructor, sayHi
 ```
 
-## Not just a syntax sugar
+## No es solamente azúcar sintáctica
 
-Sometimes people say that `class` is a "syntax sugar" in JavaScript, because we could actually declare the same without `class` keyword at all:
+A veces se dice que `class` es "azúcar sintáctica" (sintaxis que es diseñada para una lectura más fácil, pero que no introduce nada nuevo), porque en realidad podemos declarar lo mismo sin la palabra clave `class` en absoluto:
 
 ```js run
-// rewriting class User in pure functions
+// reescribiendo la clase User puramente con funciones
 
-// 1. Create constructor function
+// 1. Crear la función constructor
 function User(name) {
   this.name = name;
 }
-// any function prototype has constructor property by default,
-// so we don't need to create it
+// un prototipo de función tiene la propiedad "constructor" por defecto,
+// así que no necesitamos crearla
 
-// 2. Add the method to prototype
+// 2. Agregar el método al prototipo
 User.prototype.sayHi = function() {
   alert(this.name);
 };
 
-// Usage:
+// Uso:
 let user = new User("John");
 user.sayHi();
 ```
 
-The result of this definition is about the same. So, there are indeed reasons why `class` can be considered a syntax sugar to define a constructor together with its prototype methods.
+El resultado de esta definición es el mismo. Así, efectivamente hay razones para que `class` sea considerada azúcar sintáctica para definir un constructor junto con sus métodos de prototipo.
 
-Although, there are important differences.
+Aún así hay diferencias importantes.
 
-1. First, a function created by `class` is labelled by a special internal property `[[FunctionKind]]:"classConstructor"`. So it's not entirely the same as creating it manually.
+1. Primero, una función creada por `class` es etiquetada por una propiedad interna especial `[[IsClassConstructor]]:true`. Entones no es exactamente lo mismo que crearla manualmente.
 
-    Unlike a regular function, a class constructor can't be called without `new`:
+    El lenguaje verifica esa propiedad en varios lugares. Por ejemplo, a diferencia de las funciones regulares, esta debe ser llamada con `new`:
 
     ```js run
     class User {
@@ -155,10 +154,10 @@ Although, there are important differences.
     }
 
     alert(typeof User); // function
-    User(); // Error: Class constructor User cannot be invoked without 'new'
+    User(); // Error: El constructor de clase User no puede ser invocado sin 'new'
     ```
 
-    Also, a string representation of a class constructor in most JavaScript engines starts with the "class..."
+    Además una representación string de un constructor de clase en la mayoría de los motores JavaScript comienzan con "class..."
 
     ```js run
     class User {
@@ -167,23 +166,23 @@ Although, there are important differences.
 
     alert(User); // class User { ... }
     ```
+    Hay otras diferencias que veremos pronto.
 
-2. Class methods are non-enumerable
-    A class definition sets `enumerable` flag to `false` for all methods in the `"prototype"`.
+2. Los métodos de clase no son enumerables.
+    La definición de clase establece la bandera `enumerable` a `false` para todos los métodos en `"prototype"`.
 
-    That's good, because if we `for..in` over an object, we usually don't want its class methods.
+    Esto es bueno porque si hacemos `for..in` a un objeto usualmente no queremos sus métodos de clase.
 
-3. Classes always `use strict`
-    All code inside the class construct is automatically in strict mode.
+3. Las clases siempre asumen `use strict`.
+    Todo el código dentro del constructor de clase está automáticamente en modo estricto.
 
+Además la sintaxis de `class` brinda muchas otras características que exploraremos luego.
 
-Also, in addition to its basic operation, the `class` syntax brings many other features with it which we'll explore later.
+## Expresión de clases
 
-## Class Expression
+Al igual que las funciones, las clases pueden ser definidas dentro de otra expresión, pasadas, devueltas, asignadas, etc.
 
-Just like functions, classes can be defined inside another expression, passed around, returned, assigned etc.
-
-Here's an example of a class expression:
+Aquí hay un ejemplo de una expresión de clase:
 
 ```js
 let User = class {
@@ -193,55 +192,55 @@ let User = class {
 };
 ```
 
-Similar to Named Function Expressions, class expressions may or may not have a name.
+Al igual que las expresiones de función, las expresiones de clase pueden tener un nombre.
 
-If a class expression has a name, it's visible inside the class only:
+Si una expresión de clase tiene un nombre, este es visible solamente dentro de la clase.
 
 ```js run
-// "Named Class Expression" (alas, no such term, but that's what's going on)
+// Expresiones de clase con nombre
+// ("Named Class Expression" no figura así en la especificación, pero es equivalente a "Named Function Expression")
 let User = class *!*MyClass*/!* {
   sayHi() {
-    alert(MyClass); // MyClass is visible only inside the class
+    alert(MyClass); // El nombre de MyClass solo es visible dentro de la clase
   }
 };
 
-new User().sayHi(); // works, shows MyClass definition
+new User().sayHi(); // Funciona, muestra la definición de MyClass
 
-alert(MyClass); // error, MyClass not visible outside of the class
+alert(MyClass); // error, el nombre de MyClass no es visible fuera de la clase
 ```
 
-
-We can even make classes dynamically "on-demand", like this:
+Podemos inclusive crear clases dinámicamente "a pedido", como esto:
 
 ```js run
 function makeClass(phrase) {
-  // declare a class and return it
+  // declara una clase y la devuelve
   return class {
     sayHi() {
       alert(phrase);
-    };
+    }
   };
 }
 
-// Create a new class
+// Crea una nueva clase
 let User = makeClass("Hello");
 
 new User().sayHi(); // Hello
 ```
 
 
-## Getters/setters, other shorthands
+## Getters/setters
 
-Classes also include getters/setters, generators, computed properties etc.
+Al igual que los objetos literales, las clases pueden incluir getters/setters, propiedades calculadas, etc.
 
-Here's an example for `user.name` implemented using `get/set`:
+Aquí hay un ejemplo de `user.name`, implementado usando `get/set`:
 
 ```js run
 class User {
 
   constructor(name) {
-    // invokes the setter
-    this._name = name;
+    // invoca el setter
+    this.name = name;
   }
 
 *!*
@@ -254,7 +253,7 @@ class User {
   set name(value) {
 */!*
     if (value.length < 4) {
-      alert("Name is too short.");
+      alert("Nombre demasiado corto.");
       return;
     }
     this._name = value;
@@ -265,31 +264,21 @@ class User {
 let user = new User("John");
 alert(user.name); // John
 
-user = new User(""); // Name too short.
+user = new User(""); // Nombre demasiado corto.
 ```
 
-Internally, getters and setters are created on `User.prototype`, like this:
+Técnicamente, la declaración de clase funciona creando getters y setters en `User.prototype`.
 
-```js
-Object.defineProperties(User.prototype, {
-  name: {
-    get() {
-      return this._name
-    },
-    set(name) {
-      // ...
-    }
-  }
-});
-```
+## Nombres calculados [...]
 
-Here's an example with computed properties:
+Aquí hay un ejemplo con un nombre de método calculado usando corchetes `[...]`:
 
 ```js run
-function f() { return "sayHi"; }
-
 class User {
-  [f()]() {
+
+*!*
+  ['say' + 'Hi']() {
+*/!*
     alert("Hello");
   }
 
@@ -298,71 +287,141 @@ class User {
 new User().sayHi();
 ```
 
-For a generator method, similarly, prepend it with `*`.
+Es una característica fácil de recordar porque se asemeja a la de los objetos literales.
 
-## Class properties
+## Campos de clase (Class fields) 
 
-```warn header="Old browsers may need a polyfill"
-Class-level properties are a recent addition to the language.
+```warn header="Los navegadores viejos pueden necesitar polyfill"
+Los campos de clase son un agregado reciente al lenguaje.
 ```
 
-In the example above, `User` only had methods. Let's add a property:
+Antes, nuestras clases tenían solamente métodos.
+
+"Campos de clase" es una sintaxis que nos permite agregar una propiedad cualquiera.
+
+Por ejemplo, agreguemos la propiedad `name` a la clase `User`:
 
 ```js run
 class User {
-  name = "Anonymous";
+*!*
+  name = "John";
+*/!*
 
   sayHi() {
     alert(`Hello, ${this.name}!`);
   }
 }
 
-new User().sayHi();
+new User().sayHi(); // Hello, John!
 ```
 
-The property is not placed into `User.prototype`. Instead, it is created by `new`, separately for every object. So, the property will never be shared between different objects of the same class.
+Así, simplemente escribimos "<property name> = <value>" en la declaración, y eso es todo.
 
+La diferencia importante de las propiedades definidas como "campos de clase" es que estas son establecidas en los objetos individuales, no compartidas en `User.prototype`:
 
-## Summary
+```js run
+class User {
+*!*
+  name = "John";
+*/!*
+}
 
-JavaScript provides many ways to create a class.
+let user = new User();
+alert(user.name); // John
+alert(User.prototype.name); // undefined
+```
 
-First, as per the general object-oriented terminology, a class is something that provides "object templates", allows to create same-structured objects.
+También podemos asignar valores usando expresiones más complejas y llamados a función:
 
-When we say "a class", that doesn't necessary means the `class` keyword.
+```js run
+class User {
+*!*
+  name = prompt("Name, please?", "John");
+*/!*
+}
 
-This is a class:
+let user = new User();
+alert(user.name); // John
+```
 
-```js
-function User(name) {
-  this.sayHi = function() {
-    alert(name);
+### Vinculación de métodos (binding) usando campos de clase
+
+Como se demostró en el capítulo <info:bind>, las funciones en JavaScript tienen un `this` dinámico. Este depende del contexto del llamado.
+
+Entonces si un método de objeto es pasado y llamado en otro contexto, `this` ya no será una referencia a su objeto.
+
+Por ejemplo, este código mostrará `undefined`:
+
+```js run
+class Button {
+  constructor(value) {
+    this.value = value;
+  }
+
+  click() {
+    alert(this.value);
   }
 }
+
+let button = new Button("hello");
+
+*!*
+setTimeout(button.click, 1000); // undefined
+*/!*
 ```
 
-...But in most cases `class` keyword is used, as it provides great syntax and many additional features.
+Este problema es denominado "pérdida de `this`".
 
-The basic class syntax looks like this:
+Hay dos enfoques para solucionarlo, como se discute en el capítulo <info:bind>:
+
+1. Pasar un contenedor o wrapper-function como: `setTimeout(() => button.click(), 1000)`.
+2. Vincular el método al objeto, por ejemplo en el constructor.
+
+Los campos de clase brindan otra sintaxis, bastante elegante:
+
+```js run
+class Button {
+  constructor(value) {
+    this.value = value;
+  }
+*!*
+  click = () => {
+    alert(this.value);
+  }
+*/!*
+}
+
+let button = new Button("hello");
+
+setTimeout(button.click, 1000); // hello
+```
+
+Un campo de clase `click = () => {...}` es creado para cada objeto. Hay una función para cada objeto `Button`, con `this` dentro referenciando ese objeto. Podemos pasar `button.click` a cualquier lado y el valor de `this` siempre será el correcto.
+
+Esto es especialmente práctico, en el ambiente de los navegadores, para los "event listeners".
+
+## Resumen
+
+La sintaxis básica de clase se ve así:
 
 ```js
 class MyClass {
-  prop = value; // field
+  prop = value; // propiedad
 
   constructor(...) { // constructor
     // ...
   }
 
-  method(...) {} // method
+  method(...) {} // método
 
-  get something(...) {} // getter method
-  set something(...) {} // setter method
+  get something(...) {} // método getter
+  set something(...) {} // método setter
 
-  [Symbol.iterator]() {} // method with computed name/symbol name
+  [Symbol.iterator]() {} // método con nombre calculado (aquí, symbol)
   // ...
 }
 ```
 
-`MyClass` is technically a function, while methods are written to `MyClass.prototype`.
+`MyClass` es técnicamente una función (la que proveemos como `constructor`), mientras que los métodos, getters y setters son escritos en `MyClass.prototype`.
 
-In the next chapters we'll learn more about classes, including inheritance and other features.
+En los siguientes capítulos aprenderemos más acerca de clases, incluyendo herencia y otras características.

@@ -1,4 +1,4 @@
-The solution using a loop:
+La solución usando un bucle:
 
 ```js run
 function sumTo(n) {
@@ -12,7 +12,7 @@ function sumTo(n) {
 alert( sumTo(100) );
 ```
 
-The solution using recursion:
+La solución usando recursividad:
 
 ```js run
 function sumTo(n) {
@@ -23,7 +23,7 @@ function sumTo(n) {
 alert( sumTo(100) );
 ```
 
-The solution using the formula: `sumTo(n) = n*(n+1)/2`:
+La solución usando la fórmula: `sumTo(n) = n*(n+1)/2`:
 
 ```js run
 function sumTo(n) {
@@ -33,8 +33,8 @@ function sumTo(n) {
 alert( sumTo(100) );
 ```
 
-P.S. Naturally, the formula is the fastest solution. It uses only 3 operations for any number `n`. The math helps!
+P.D. Naturalmente, la fórmula es la solución más rápida. Utiliza solo 3 operaciones para cualquier número `n` ¡Las matemáticas ayudan!
 
-The loop variant is the second in terms of speed. In both the recursive and the loop variant we sum the same numbers. But the recursion involves nested calls and execution stack management. That also takes resources, so it's slower.
+La variación con el bucle es la segunda en términos de velocidad. Tanto en la variante recursiva como en el bucle sumamos los mismos números. Pero la recursión implica llamadas anidadas y gestión de la pila de ejecución. Eso también requiere recursos, por lo que es más lento.
 
-P.P.S. The standard describes a "tail call" optimization: if the recursive call is the very last one in the function (like in `sumTo` above), then the outer function will not need to resume the execution and we don't need to remember its execution context. In that case `sumTo(100000)` is countable. But if your JavaScript engine does not support it, there will be an error: maximum stack size exceeded, because there's usually a limitation on the total stack size.
+P.P.D. Algunos motores admiten la optimización de "tail call": si una llamada recursiva es la última en la función, sin cálculo extra, entonces la función externa no necesitará reanudar la ejecución, por lo que el motor no necesita recordar su contexto de ejecución. Eso elimina la carga en la memoria. Pero si el motor de JavaScript no soporta la optimización "tail call" (la mayoría no lo hace), entonces habrá  un error: tamaño máximo de la pila excedido, porque generalmente hay una limitación en el tamaño total de la pila.

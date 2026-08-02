@@ -1,204 +1,258 @@
-# Popups and window methods
+# Ventanas emergentes y métodos de ventana
 
-A popup window is one of the oldest methods to show additional document to user.
+Una ventana emergente (popup window) es uno de los métodos más antiguos para mostrar documentos adicionales al usuario.
 
-Basically, you just run:
+Básicamente, solo ejecutas :
 ```js
-window.open('https://javascript.info/')
+window.open("https://javascript.info/");
 ```
 
-... And it will open a new window with given URL. Most modern browsers are configured to open new tabs instead of separate windows.
+...Y eso abrirá una nueva ventana con la URL dada. La mayoría de los navegadores modernos están configurados para abrir pestañas nuevas en vez de ventanas separadas.
 
-## Popup blocking
+Los popups existen desde tiempos realmente antiguos. La idea inicial fue mostrar otro contenido sin cerrar la ventana principal. Ahora hay otras formas de hacerlo: podemos cargar contenido dinámicamente con [fetch](info:fetch) y mostrarlo de forma dinámica con `<div>`. Entonces, los popups no son algo que usamos todos los días.
 
-Popups exist from really ancient times. The initial idea was to show another content without closing the main window. As of now, there are other ways to do that: JavaScript is able to send requests for server, so popups are rarely used. But sometimes they are still handy.
+Además, los popups son complicados en dispositivos móviles, que no muestran varias ventanas simultáneamente.
 
-In the past evil sites abused popups a lot. A bad page could open tons of popup windows with ads. So now most browsers try to block popups and protect the user.
+Aún así, hay tareas donde los popups todavía son usados, por ejemplo para autorización o autenticación (Ingreso con Google/Facebook/...), porque:
 
-**Most browsers block popups if they are called outside of user-triggered event handlers like `onclick`.**
+1. Un popup es una ventana separada con su propio entorno JavaScript independiente. Por lo tanto es seguro abrir un popup desde un sitio de terceros no confiable.
+2. Es muy fácil abrir un popup.
+3. Un popup puede navegar (cambiar URL) y enviar mensajes a la ventana que lo abrió.
 
-For example:
+## Bloqueo de ventanas emergentes (Popup)
+
+En el pasado, sitios malvados abusaron mucho de las ventanas emergentes. Una página incorrecta podría abrir toneladas de ventanas emergentes con anuncios. Entonces, la mayoría de los navegadores intentan bloquear las ventanas emergentes y proteger al usuario.
+
+**La mayoría de los navegadores bloquean las ventanas emergentes si se llaman fuera de los controladores de eventos activados por el usuario, como `onclick`.**
+
+Por ejemplo:
 ```js
 // popup blocked
-window.open('https://javascript.info');
+window.open("https://javascript.info");
 
 // popup allowed
 button.onclick = () => {
-  window.open('https://javascript.info');
+  window.open("https://javascript.info");
 };
 ```
 
-This way users are somewhat protected from unwanted popups, but the functionality is not disabled totally.
-
-What if the popup opens from `onclick`, but after `setTimeout`? That's a bit tricky.
-
-Try this code:
-
-```js run
-// open after 3 seconds
-setTimeout(() => window.open('http://google.com'), 3000);
-```
-
-The popup opens in Chrome, but gets blocked in Firefox.
-
-...If we decrease the delay, the popup works in Firefox too:
-
-```js run
-// open after 1 seconds
-setTimeout(() => window.open('http://google.com'), 1000);
-```
-
-The difference is that Firefox treats a timeout of 2000ms or less are acceptable, but after it -- removes the "trust", assuming that now it's "outside of the user action". So the first one is blocked, and the second one is not.
-
-## Modern usage
-
-As of now, we have many methods to load and show data on-page with JavaScript. But there are still situations when a popup works best.
-
-For instance, many shops use online chats for consulting people. A visitor clicks on the button, it runs `window.open` and opens the popup with the chat.
-
-Why a popup is good here, why not in-page?
-
-1. A popup is a separate window with its own independent JavaScript environment. So a chat service doesn't need to integrate with scripts of the main shop site.
-2. A popup is very simple to attach to a site, little to no overhead. It's only a small button, without additional scripts.
-3. A popup may persist even if the user left the page. For example, a consult advices the user to visit the page of a new "Super-Cooler" goodie. The user goes there in the main window without leaving the chat.
+De esta manera, los usuarios están algo protegidos de ventanas emergentes no deseadas, pero la funcionalidad no está totalmente deshabilitada.
 
 ## window.open
 
-The syntax to open a popup is: `window.open(url, name, params)`:
+La sintaxis para abrir una ventana emergente es: `window.open(url, name, params)`:
 
 url
-: An URL to load into the new window.
+: Una URL para cargar en la nueva ventana.
 
 name
-: A name of the new window. Each window has a `window.name`, and here we can specify which window to use for the popup. If there's already a window with such name -- the given URL opens in it, otherwise a new window is opened.
+: Un nombre de la nueva ventana. Cada ventana tiene un `window.name`, y aquí podemos especificar cuál ventana usar para la ventana emergente. Si hay una ventana con ese nombre, la URL dada se abre en ella, de lo contrario abre una nueva ventana.
 
 params
-: The configuration string for the new window. It contains settings, delimited by a comma. There must be no spaces in params, for instance: `width:200,height=100`.
+: La cadena de configuración para nueva ventana. Contiene configuraciones, delimitado por una coma. No debe haber espacios en los parámetros, por ejemplo: `width=200,height=100`.
 
-Settings for `params`:
+Configuración de `params`:
 
-- Position:
-  - `left/top` (numeric) -- coordinates of the window top-left corner on the screen. There is a limitation: a new window cannot be positioned offscreen.
-  - `width/height` (numeric) -- width and height of a new window. There is a limit on minimal width/height, so it's impossible to create an invisible window.
-- Window features:
-  - `menubar` (yes/no) -- shows or hides the browser menu on the new window.
-  - `toolbar` (yes/no) -- shows or hides the browser navigation bar (back, forward, reload etc) on the new window.
-  - `location` (yes/no) -- shows or hides the URL field in the new window. FF and IE don't allow to hide it by default.
-  - `status` (yes/no) -- shows or hides the status bar. Again, most browsers force it to show.
-  - `resizable` (yes/no) -- allows to disable the resize for the new window. Not recommended.
-  - `scrollbars` (yes/no) -- allows to disable the scrollbars for the new window. Not recommended.
+- Posición:
+  - `left/top` (numérico) -- coordenadas de la esquina superior izquierda de la ventana en la pantalla.Hay una limitación: no se puede colocar una nueva ventana fuera de la pantalla.
+  - `width/height` (numérico) -- ancho y alto de una nueva ventana. Hay un límite mínimo de ancho/alto , así que es imposible crear una ventana invisible.
+- Características de la ventana:
+  - `menubar` (yes/no) -- muestra u oculta el menú del navegador en la nueva ventana.
+  - `toolbar` (yes/no) -- muestra u oculta la barra de navegación del navegador (atrás, adelante, recargar, etc.) en la nueva ventana.
+  - `location` (yes/no) -- muestra u oculta el campo URL en la nueva ventana. FF e IE no permiten ocultarlo por defecto.
+  - `status` (yes/no) -- muestra u oculta la barra de estado. De nuevo, la mayoría de los navegadores lo obligan a mostrar.
+  - `resizable` (yes/no) -- permite deshabilitar el cambio de tamaño para la nueva ventana. No recomendado.
+  - `scrollbars` (yes/no) -- permite deshabilitar las barras de desplazamiento para la nueva ventana. No recomendado.
 
 
-There is also a number of less supported browser-specific features, which are usually not used. Check <a href="https://developer.mozilla.org/en/DOM/window.open">window.open in MDN</a> for examples.
+También hay una serie de características específicas del navegador menos compatibles, que generalmente no se usan. Revisa <a href="https://developer.mozilla.org/es/docs/Web/API/Window/open">window.open en MDN</a> para ejemplos.
 
-## Example: a minimalistic window   
+## Ejemplo: Una ventana minimalista
 
-Let's open a window with minimal set of features just to see which of them browser allows to disable:
+Abramos una ventana con un conjunto mínimo de características solo para ver cuál de ellos permite desactivar el navegador:
 
 ```js run
 let params = `scrollbars=no,resizable=no,status=no,location=no,toolbar=no,menubar=no,
 width=0,height=0,left=-1000,top=-1000`;
 
-open('/', 'test', params);
+open("/", "test", params);
 ```
 
-Here most "window features" are disabled and window is positioned offscreen. Run it and see what really happens. Most browsers "fix" odd things like zero `width/height` and offscreen `left/top`. For instance, Chrome open such a window with full width/height, so that it occupies the full screen.
+Aquí la mayoría de las "características de la ventana" están deshabilitadas y la ventana se coloca fuera de la pantalla. Ejecútelo y vea lo que realmente sucede. La mayoría de los navegadores "arreglan" cosas extrañas como cero `ancho/alto` y fuera de pantalla `Izquierda/superior`. Por ejemplo, Chrome abre una ventana con ancho/alto completo, para que ocupe la pantalla completa.
 
-Let's add normal positioning options and reasonable `width`, `height`, `left`, `top` coordinates:
+Agreguemos opciones de posicionamiento normal y coordenadas razonables de `ancho`,`altura`, `izquierda`,`arriba`:
 
 ```js run
 let params = `scrollbars=no,resizable=no,status=no,location=no,toolbar=no,menubar=no,
 width=600,height=300,left=100,top=100`;
 
-open('/', 'test', params);
+open("/", "test", params);
 ```
 
-Most browsers show the example above as required.
+La mayoría de los navegadores muestran el ejemplo anterior según sea necesario.
 
-Rules for omitted settings:
+Reglas para configuraciones omitidas:
 
-- If there is no 3rd argument in the `open` call, or it is empty, then the default window parameters are used.
-- If there is a string of params, but some yes/no features are omitted, then the omitted features are disabled, if the browser allows that. So if you specify params, make sure you explicitly set all required features to yes.
-- If there is no `left/top` in params, then the browser tries to open a new window near the last opened window.
-- If there is no `width/height`, then the new window will be the same size as the last opened.
+- Si no hay un tercer argumento en la llamada a `open` o está vacío, se usan los parámetros de ventana predeterminados.
+- Si hay una cadena de params, pero se omiten algunas características sí/no (`yes/no`), las características omitidas se asumen con valor `no` . Entonces, si especifica parámetros, asegúrese de establecer explícitamente todas las funciones requeridas en `yes`.
+- Si no hay `izquierda/arriba` en params, entonces el navegador intenta abrir una nueva ventana cerca de la última ventana abierta.
+- Si no hay `ancho/altura`, entonces la nueva ventana tendrá el mismo tamaño que la última abierta.
 
-## Accessing a popup
+## Acceder a la ventana emergente desde la ventana
 
-The `open` call returns a reference to the new window. It can be used to manipulate it's properties, change location and even more.
+La llamada `open` devuelve una referencia a la nueva ventana. Se puede usar para manipular sus propiedades, cambiar de ubicación y aún más.
 
-In the example below, the contents of the new window is modified after loading.
+En este ejemplo, generamos contenido emergente a partir de JavaScript:
+
+```js
+let newWin = window.open("about:blank", "hello", "width=200,height=200");
+
+newWin.document.write("Hello, world!");
+```
+
+Y aquí modificamos el contenido después de la carga:
 
 ```js run
-let newWindow = open('/', 'example', 'width=300,height=300')
+let newWindow = open("/", "example", "width=300,height=300");
 newWindow.focus();
+
+alert(newWindow.location.href); // (*) about:blank, loading hasn't started yet
 
 newWindow.onload = function() {
   let html = `<div style="font-size:30px">Welcome!</div>`;
-*!*
-  newWindow.document.body.insertAdjacentHTML('afterbegin', html);
-*/!*
+*!*  
+  newWindow.document.body.insertAdjacentHTML("afterbegin", html);
+*/!*  
 };
 ```
 
-Please note that external `document` content is only accessible for windows from the same origin (the same protocol://domain:port).
+Por favor, tenga en cuenta: inmediatamente después de `window.open` la nueva ventana no está cargada aún. Esto queda demostrado por el `alert` en la linea `(*)`. Así que esperamos a que `onload` lo modifique. También podríamos usar `DOMContentLoaded` de los manejadores de `newWin.document`.
 
-For windows with URLs from another sites, we are able to change the location by assigning `newWindow.location=...`, but we can't read the location or access the content. That's for user safety, so that an evil page can't open a popup with `http://gmail.com` and read the data. We'll talk more about it later.
+```warn header="Política mismo origen"
+Las ventanas pueden acceder libremente a los contenidos de las demás sólo si provienen del mismo origen (el mismo protocolo://domain:port).
 
-## Accessing the opener window   
+De lo contrario es imposible por razones de seguridad del usuario, por ejemplo si la ventana principal es de `site.com` y la ventana emergente (popup) es de  `gmail.com`. Para los detalles, ver capitulo <info:cross-window-communication>.
+```
 
-A popup may access the "opener" window as well. A JavaScript in it may use `window.opener` to access the window that opened it. It is `null` for all windows except popups.
+## Acceder a la ventana desde el popup
 
-So both the main window and the popup have a reference to each other. They may modify each other freely assuming that they come from the same origin. If that's not so, then there are still means to communicate, to be covered in the next chapter <info:cross-window-communication>.
+Un popup también puede acceder la ventana que lo abrió usando la referencia `window.opener`. Es `null` para todas las ventanas excepto los popups.
 
-## Closing a popup
-
-If we don't need a popup any more, we can call `newWindow.close()` on it.
-
-Technically, the `close()` method is available for any `window`, but `window.close()` is ignored by most browsers if `window` is not created with `window.open()`.
-
-The `newWindow.closed` is `true` if the window is closed. That's useful to check if the popup (or the main window) is still open or not. A user could close it, and our code should take that possibility into account.
-
-This code loads and then closes the window:
+Si ejecutas el código de abajo, reemplaza el contenido de la ventana del opener (actual) con "Test":
 
 ```js run
-let newWindow = open('/', 'example', 'width=300,height=300')
-newWindow.onload = function() {
+let newWin = window.open("about:blank", "hello", "width=200,height=200");
+
+newWin.document.write(
+  "<script>window.opener.document.body.innerHTML = 'Test'<\/script>"
+);
+```
+
+Así que la conexión entre las ventanas es bidireccional: la ventana principal y el popup tienen una referencia entre sí.
+
+## Cerrar una popup
+
+Para cerrar una ventana: `win.close()`.
+
+Para comprobar si una ventana esta cerrada: `win.closed`.
+
+Técnicamente, el `close()` es un método disponible para cualquier `ventana`, pero `window.close()` es ignorado por la mayoría de los navegadores si `window` no es creada con `window.open()`. Así que solo funcionará en una popup.
+
+El `closed` es una propiedad `true` si la ventana esta cerrada. Eso es usualmente para comprobar la popup (o la ventana principal) está todavía abierta o no. Un usuario puede cerrarla en cualquier momento, y nuestro código debería tener esa posibilidad en cuenta.
+
+Este código se carga y luego cierra la ventana:
+
+```js run
+let newWindow = open("/", "example", "width=300,height=300");
+
+newWindow.onload = function () {
   newWindow.close();
   alert(newWindow.closed); // true
 };
 ```
 
-## Focus/blur on a popup
 
-Theoretically, there are `window.focus()` and `window.blur()` methods to focus/unfocus on a window.  Also there are `focus/blur` events that allow to focus a window and catch the moment when the visitor switches elsewhere.
+## desplazamiento y cambio de tamaño
 
-In the past evil pages abused those. For instance, look at this code:
+Hay métodos para mover/redimensionar una ventana:
+
+`win.moveBy(x,y)`
+: Mueve la ventana en relación con la posición actual `x` píxeles a la derecha y `y` píxeles hacia abajo. Valores negativos están permitidos(para mover a la izquierda/arriba).
+
+`win.moveTo(x,y)`
+: Mover la ventana por coordenadas `(x,y)` en la pantalla.
+
+`win.resizeBy(width,height)`
+: Cambiar el tamaño de la ventana según el `width/height` dado en relación con el tamaño actual. Se permiten valores negativos.
+
+`win.resizeTo(width,height)`
+: Redimensionar la ventana al tamaño dado.
+
+También existe el evento `window.onresize`.
+
+```warn header="Solo Popup"
+Para evitar abusos, el navegador suele bloquear estos métodos. Solo funcionan de manera confiable en las ventanas emergentes que abrimos, que no tienen pestañas adicionales.
+```
+
+```warn header="No minification/maximization"
+JavaScript no tiene forma de minimizar o maximizar una ventana. Estas funciones de nivel de sistema operativo están ocultas para los desarrolladores de frontend.
+
+Los métodos de movimiento/cambio de tamaño no funcionan para ventanas maximizadas/minimizadas.
+```
+
+## desplazando una ventana
+
+Ya hemos hablado sobre el desplazamiento de una ventana en el capítulo <info:size-and-scroll-window>.
+
+`win.scrollBy(x,y)`
+: Desplaza la ventana `x` píxeles a la derecha y `y` hacia abajo en relación con el actual desplazamiento. Se permiten valores negativos.
+
+`win.scrollTo(x,y)`
+: Desplaza la ventana a las coordenadas dadas `(x,y)`.
+
+`elem.scrollIntoView(top = true)`
+: Desplaza la ventana para hacer que `elem` aparezca en la parte superior (la predeterminada) o en la parte inferior para `elem.scrollIntoView(false)`.
+
+También existe el evento `window.onscroll`.
+
+## Enfocar/desenfocar una ventana
+
+Teóricamente, están los métodos `window.focus()` y `window.blur()` para poner/sacar el foco de una ventana. Y los eventos `focus/blur` que permiten captar el momento en el que el visitante enfoca una ventana y en el que cambia a otro lugar.
+
+En la práctica estos métodos están severamente limitado, porque en el pasado las páginas malignas abusaban de ellos. 
+
+Por ejemplo, mira este código:
 
 ```js run
 window.onblur = () => window.focus();
 ```
 
-When a user attempts to switch out of the window (`blur`), it brings it back to focus. The intention is to "lock" the user within the `window`.
+Cuando un usuario intenta salir de la ventana (`window.onblur`), lo vuelve a enfocar. La intención es "bloquear" al usuario dentro de la `window`.
 
-So, there are limitations that forbid the code like that. There are many limitations to protect the user from ads and evils pages. They depend on the browser.
+Entonces, hay limitaciones que prohíben el código así. Existen muchas limitaciones para proteger al usuario de anuncios y páginas malignas. Ellos dependen del navegador.
 
-For instance, a mobile browser usually ignores that call completely. Also focusing doesn't work when a popup opens in a separate tab rather than a new window.
+Por ejemplo, un navegador móvil generalmente ignora esa llamada por completo. Además, el enfoque no funciona cuando se abre una ventana emergente en una pestaña separada en lugar de en una nueva ventana.
 
-Still, there are some things that can be done.
+Aún así hay algunas cosas que se pueden hacer.
 
-For instance:
+Por ejemplo:
 
-- When we open a popup, it's might be a good idea to run a `newWindow.focus()` on it. Just in case, for some OS/browser combinations it ensures that the user is in the new window now.
-- If we want to track when a visitor actually uses our web-app, we can track `window.onfocus/onblur`. That allows us to suspend/resume in-page activities, animations etc. But please note that the `blur` event means that the visitor switched out from the window, but they still may observe it. The window is in the background, but still may be visible.
+- Cuando abrimos una popup, puede ser una buena idea ejecutar un `newWindow.focus()` en ella. Solo por si acaso. Para algunas combinaciones de sistema-operativo/navegador, asegura que el usuario ahora esté en la nueva ventana.
+- Si queremos saber cuándo un visitante realmente usa nuestra aplicación web, podemos monitorear `window.onfocus/onblur`. Esto nos permite suspender/reanudar las actividades en la página, animaciones etc. Pero tenga en cuenta que el evento `blur` solamente significa que el visitante salió de la ventana. La ventana queda en segundo plano, pero aún puede ser visible.
 
-## Summary   
+## Resumen
 
-- A popup can be opened by the `open(url, name, params)` call. It returns the reference to the newly opened window.
-- By default, browsers block `open` calls from the code outside of user actions. Usually a notification appears, so that a user may allow them.
-- The popup may access the opener window using the `window.opener` property, so the two are connected.
-- If the main window and the popup come from the same origin, they can freely read and modify each other. Otherwise, they can change location of each other and communicate using messages (to be covered).
-- To close the popup: use `close()` call. Also the user may close them (just like any other windows). The `window.closed` is `true` after that.
-- Methods `focus()` and `blur()` allow to focus/unfocus a window. Sometimes.
-- Events `focus` and `blur` allow to track switching in and out of the window. But please note that a  window may still be visible even in the background state, after `blur`.
+Las ventanas emergentes se utilizan con poca frecuencia, ya que existen alternativas: cargar y mostrar información en la página o en iframe.
 
-Also if we open a popup, a good practice is to notify the user about it. An icon with the opening window can help the visitor to survive the focus shift and keep both windows in mind.
+Si vamos a abrir una ventana emergente, una buena práctica es informar al usuario al respecto. Un icono de "ventana que se abre" cerca de un enlace o botón permitiría al visitante sobrevivir al cambio de enfoque y tener en cuenta ambas ventanas.
+
+- Se puede abrir una ventana emergente con la llamada `open (url, name, params)`. Devuelve la referencia a la ventana recién abierta.
+- Los navegadores bloquean las llamadas `open` desde el código fuera de las acciones del usuario. Por lo general aparece una notificación para que un usuario pueda permitirlos.
+- Los navegadores abren una nueva pestaña de forma predeterminada, pero si se proporcionan tamaños, será una ventana emergente.
+- La ventana emergente puede acceder a la ventana que la abre usando la propiedad `window.opener`.
+- La ventana principal y la ventana emergente pueden leerse y modificarse libremente entre sí si tienen el mismo origen. De lo contrario, pueden cambiar de ubicación e [intercambiar mensajes](info:cross-window-communication).
+
+Para cerrar la ventana emergente: use `close ()`. Además, el usuario puede cerrarlas (como cualquier otra ventana). El `window.closed` es`true` después de eso.
+
+- Los métodos `focus ()` y `blur ()` permiten enfocar/desenfocar una ventana. Pero no funcionan todo el tiempo.
+- Los eventos `focus` y`blur` permiten rastrear el cambio dentro y fuera de la ventana. Pero tenga en cuenta que una ventana puede seguir siendo visible incluso en el estado de fondo, después de "desenfoque".

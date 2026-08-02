@@ -1,55 +1,54 @@
-# Drag'n'Drop with mouse events
+# Arrastrar y Soltar con eventos del ratón
 
-Drag'n'Drop is a great interface solution. Taking something, dragging and dropping is a clear and simple way to do many things, from copying and moving (see file managers) to ordering (drop into cart).
+Arrastrar y Soltar es una excelente solución de interfaz. Tomar algo, arrastrar y soltarlo es una forma clara y simple de hacer muchas cosas, desde copiar y mover documentos (como en los manejadores de archivos) hasta ordenar (arrastrando ítems al carrito).
 
-In the modern HTML standard there's a [section about Drag Events](https://html.spec.whatwg.org/multipage/interaction.html#dnd).
+En el estándar moderno de HTML hay una [sección sobre Arrastrar y Soltar](https://html.spec.whatwg.org/multipage/interaction.html#dnd) con eventos especiales tales como `dragstart`, `dragend`, y así por el estilo.
 
-They are interesting, because they allow to solve simple tasks easily, and also allow to handle drag'n'drop of "external" files into the browser. So we can take a file in the OS file-manager and drop it into the browser window. Then JavaScript gains access to its contents.
+Estos eventos nos permiten soportar tipos especiales de Arrastrar y Soltar, como manejar el arrastrado de archivos desde el manejador de archivos del Sistema Operativo y soltarlo en la ventana del navegador. Así JavaScript puede acceder al contenido de dichos archivos.
 
-But native Drag Events also have limitations. For instance, we can limit dragging by a certain area. Also we can't make it "horizontal" or "vertical" only. There are other drag'n'drop tasks that can't be implemented using that API.
+Pero los eventos nativos de arrastrar tienen limitaciones. Por ejemplo, no nos deja evitar el arrastre desde cierta área. Tampoco podemos hacer que el arrastre sea solamente "horizontal" o "vertical". Y hay muchas otras tareas de "Arrastrar y Soltar" que no pueden hacerse utilizándolos. Además, el soporte para dichos eventos es muy pobre en dispositivos móviles.
 
-So here we'll see how to implement Drag'n'Drop using mouse events. Not that hard either.
+Así que aquí veremos cómo implementar "Arrastrar y Soltar" usando eventos del ratón.
 
-## Drag'n'Drop algorithm
+## Algoritmo de "Arrastrar y Soltar"
 
-The basic Drag'n'Drop algorithm looks like this:
+El algoritmo básico de Arrastrar y Soltar se ve así:
 
-1. Catch `mousedown` on a draggable element.
-2. Prepare the element for moving (maybe create a copy of it or whatever).
-3. Then on `mousemove` move it by changing `left/top` and `position:absolute`.
-4. On `mouseup` (button release) -- perform all actions related to a finished Drag'n'Drop.
+1. En `mousedown` - preparar el elemento para moverlo, si es necesario (quizá creando un clon de este, añadiéndole una clase, o lo que sea).
+2. En `mousemove` - moverlo cambiando `left/top` con `position:absolute`.
+3. En `mouseup` - realizar todas las acciones relacionadas con finalizar el Arrastrar y Soltar.
 
-These are the basics. We can extend it, for instance, by highlighting droppable (available for the drop) elements when hovering over them.
+Esto es lo básico. Luego veremos como añadir características, como resaltar los elementos subyacentes mientras arrastramos sobre ellos.
 
-Here's the algorithm for drag'n'drop of a ball:
+Aquí esta la implementación de arrastrar una pelota:
 
 ```js
-ball.onmousedown = function(event) { // (1) start the process
-
-  // (2) prepare to moving: make absolute and on top by z-index
+ball.onmousedown = function(event) { 
+  // (1) preparar para mover: hacerlo absoluto y ponerlo sobre todo con el z-index
   ball.style.position = 'absolute';
   ball.style.zIndex = 1000;
-  // move it out of any current parents directly into body
-  // to make it positioned relative to the body
+
+  // quitar cualquier padre actual y moverlo directamente a body
+  // para posicionarlo relativo al body
   document.body.append(ball);  
-  // ...and put that absolutely positioned ball under the cursor
 
-  moveAt(event.pageX, event.pageY);
-
-  // centers the ball at (pageX, pageY) coordinates
+  // centrar la pelota en las coordenadas (pageX, pageY)
   function moveAt(pageX, pageY) {
     ball.style.left = pageX - ball.offsetWidth / 2 + 'px';
     ball.style.top = pageY - ball.offsetHeight / 2 + 'px';
   }
 
+  // mover nuestra pelota posicionada absolutamente bajo el puntero
+  moveAt(event.pageX, event.pageY);
+
   function onMouseMove(event) {
     moveAt(event.pageX, event.pageY);
   }
 
-  // (3) move the ball on mousemove
+  // (2) mover la pelota con mousemove
   document.addEventListener('mousemove', onMouseMove);
 
-  // (4) drop the ball, remove unneeded handlers
+  // (3) soltar la pelota, quitar cualquier manejador de eventos innecesario
   ball.onmouseup = function() {
     document.removeEventListener('mousemove', onMouseMove);
     ball.onmouseup = null;
@@ -58,19 +57,19 @@ ball.onmousedown = function(event) { // (1) start the process
 };
 ```
 
-If we run the code, we can notice something strange. On the beginning of the drag'n'drop, the ball "forks": we start dragging its "clone".
+Si ejecutamos el código, nos enteramos de algo extraño. Al inicio de arrastrar y soltar, la pelota se duplica: empezamos a arrastrar su "clon".
 
 ```online
-Here's an example in action:
+Aquí hay un ejemplo en acción:
 
 [iframe src="ball" height=230]
 
-Try to drag'n'drop the mouse and you'll see the strange behavior.
+Trata de arrastrar con el ratón y verás dicho comportamiento.
 ```
 
-That's because the browser has its own Drag'n'Drop for images and some other elements that runs automatically and conflicts with ours.
+Esto es porque el navegador tiene su propio soporte para arrastrar y soltar para imágenes y otros elementos. Se ejecuta automáticamente y entra en conflicto con el nuestro.
 
-To disable it:
+Para deshabilitarlo:
 
 ```js
 ball.ondragstart = function() {
@@ -78,40 +77,42 @@ ball.ondragstart = function() {
 };
 ```
 
-Now everything will be all right.
+Ahora todo estará bien.
 
 ```online
-In action:
+En acción:
 
 [iframe src="ball2" height=230]
 ```
 
-Another important aspect -- we track `mousemove` on `document`, not on `ball`. From the first sight it may seem that the mouse is always over the ball, and we can put `mousemove` on it.
+Otro aspecto importante: seguimos `mousemove` en `document`, no en `ball`. Desde el primer momento debe verse que el ratón está siempre sobre la pelota, y podemos poner `mousemove` en ella.
 
-But as we remember, `mousemove` triggers often, but not for every pixel. So after swift move the cursor can jump from the ball somewhere in the middle of document (or even outside of the window).
+Pero como recordamos, `mousemove` se dispara a menudo, pero no por cada pixel. Así que después de un movimiento rápido el puntero puede saltar de la pelota a algún lugar en el medio del documento (o incluso fuera de la ventana).
 
-So we should listen on `document` to catch it.
+Así que tenemos que escuchar en `document` para captarlo.
 
-## Correct positioning
+## Posicionamiento correcto
 
-In the examples above the ball is always centered under the pointer:
+En los ejemplos de arriba la pelota siempre se mueve, de manera que su centro queda debajo del puntero:
 
 ```js
 ball.style.left = pageX - ball.offsetWidth / 2 + 'px';
 ball.style.top = pageY - ball.offsetHeight / 2 + 'px';
 ```
 
-Not bad, but there's a side-effect. To initiate the drag'n'drop can we `mousedown` anywhere on the ball. If do it at the edge, then the ball suddenly "jumps" to become centered.
+Nada mal, pero hay un efecto secundario. Para iniciar el arrastrar y soltar, podemos hacer `mousedown` en cualquier lugar de la pelota. Pero si la "tomamos" por el borde, entonces la pelota "salta" de repente para centrarse bajo el puntero del ratón.
 
-It would be better if we keep the initial shift of the element relative to the pointer.
+Sería mejor si mantenemos la posición inicial del elemento, relativo al puntero.
 
-For instance, if we start dragging by the edge of the ball, then the cursor should remain over the edge while dragging.
+Por ejemplo, si empezamos a arrastrar por el borde de la pelota, entonce el puntero debería quedarse sobre el borde mientras se arrastra.
 
 ![](ball_shift.svg)
 
-1. When a visitor presses the button (`mousedown`) -- we can remember the distance from the cursor to the left-upper corner of the ball in variables `shiftX/shiftY`. We should keep that distance while dragging.
+Vamos a actualizar nuestro algoritmo:
 
-    To get these shifts we can substract the coordinates:
+1. Cuando un visitante presiona el botón (`mousedown`) - recordar la distancia del puntero a la esquina superior izquierda de la pelota in variables `shiftX/shiftY`. Mantendremos esa distancia mientras arrastramos.
+
+    Para obtener esas posiciones podemos restar las coordenadas:
 
     ```js
     // onmousedown
@@ -119,18 +120,16 @@ For instance, if we start dragging by the edge of the ball, then the cursor shou
     let shiftY = event.clientY - ball.getBoundingClientRect().top;
     ```
 
-    Please note that there's no method to get document-relative coordinates in JavaScript, so we use window-relative coordinates here.
-
-2. Then while dragging we position the ball on the same shift relative to the pointer, like this:
+2. Entonces mientras arrastra posicionamos la pelota en la misma posición relativa al puntero, de esta forma:
 
     ```js
     // onmousemove
-    // ball has position:absoute
+    // la pelota tiene position:absolute
     ball.style.left = event.pageX - *!*shiftX*/!* + 'px';
     ball.style.top = event.pageY - *!*shiftY*/!* + 'px';
     ```
 
-The final code with better positioning:
+El código final con mejor posicionamiento:
 
 ```js
 ball.onmousedown = function(event) {
@@ -146,7 +145,8 @@ ball.onmousedown = function(event) {
 
   moveAt(event.pageX, event.pageY);
 
-  // centers the ball at (pageX, pageY) coordinates
+  // mueve la pelota a las coordenadas (pageX, pageY)
+  // tomando la posición inicial en cuenta
   function moveAt(pageX, pageY) {
     ball.style.left = pageX - *!*shiftX*/!* + 'px';
     ball.style.top = pageY - *!*shiftY*/!* + 'px';
@@ -156,10 +156,10 @@ ball.onmousedown = function(event) {
     moveAt(event.pageX, event.pageY);
   }
 
-  // (3) move the ball on mousemove
+  // mueve la pelota con mousemove
   document.addEventListener('mousemove', onMouseMove);
 
-  // (4) drop the ball, remove unneeded handlers
+  // suelta la pelota, elimina el manejador innecesario
   ball.onmouseup = function() {
     document.removeEventListener('mousemove', onMouseMove);
     ball.onmouseup = null;
@@ -173,30 +173,32 @@ ball.ondragstart = function() {
 ```
 
 ```online
-In action (inside `<iframe>`):
+En acción (dentro de un `<iframe>`):
 
 [iframe src="ball3" height=230]
 ```
 
-The difference is especially noticeable if we drag the ball by its right-bottom corner. In the previous example the ball "jumps" under the pointer. Now it fluently follows the cursor from the current position.
+La diferencia es notable especialmente si arrastramos la pelota por su esquina inferior derecha. En el ejemplo anterior la pelota "salta" bajo el puntero. Ahora sigue el puntero fluidamente desde su posición actual.
 
-## Detecting droppables
+## Objetivos receptores potenciales (droppables)
 
-In previous examples the ball could be dropped just "anywhere" to stay. In real-life we usually take one element and drop it onto another. For instance, a file into a folder, or a user into a trash can or whatever.
+En los ejemplos anteriores la pelota debe ser soltada simplemente "en cualquier lugar" para quedarse. En la vida real normalmente tomamos un elemento para soltarlo en otro. Por ejemplo, un "archivo" en una "carpeta" o algo más.
 
-Abstractly, we take a "draggable" element and drop it onto "droppable" element.
+Hablando abstracto, tomamos un elemento "arrastrable" y lo soltamos sobre un elemento "receptor".
 
-We need to know the target droppable at the end of Drag'n'Drop -- to do the corresponding action, and, preferably, during the dragging process, to highlight it.
+Necesitamos saber:
+- dónde el elemento fue soltado al final del Arrastrar y Soltar -- para hacer la acción correspondiente,
+- y, preferiblemente, saber el receptor sobre el que estamos arrastrando, para resaltarlo.
 
-The solution is kind-of interesting and just a little bit tricky, so let's cover it here.
+La solución es algo interesante y un poco complicado, así que vamos a cubrirlo aquí.
 
-What's the first idea? Probably to put `onmouseover/mouseup` handlers on potential droppables and detect when the mouse pointer appears over them. And then we know that we are dragging/dropping on that element.
+¿Cuál puede ser la primera idea? ¿Probablemente configurar `mouseover/mouseup` en receptores potenciales?
 
-But that doesn't work.
+Pero eso no funciona.
 
-The problem is that, while we're dragging, the draggable element is always above other elements. And mouse events only happen on the top element, not on those below it.
+El problema es que, mientras estamos arrastrando, el elemento arrastrable siempre está encima de los demás elementos. Y los eventos del ratón solo suceden en el elemento superior, no en los que están debajo.
 
-For instance, below are two `<div>` elements, red on top of blue. There's no way to catch an event on the blue one, because the red is on top:
+Por ejemplo, debajo hay dos elementos `<div>`, el rojo sobre el azul (totalmente cubierto). No hay forma de captar un evento en el azul, porque el rojo está encima:
 
 ```html run autorun height=60
 <style>
@@ -207,36 +209,39 @@ For instance, below are two `<div>` elements, red on top of blue. There's no way
     top: 0;
   }
 </style>
-<div style="background:blue" onmouseover="alert('never works')"></div>
-<div style="background:red" onmouseover="alert('over red!')"></div>
+<div style="background:blue" onmouseover="alert('nunca funciona')"></div>
+<div style="background:red" onmouseover="alert('sobre el rojo!')"></div>
 ```
 
-The same with a draggable element. The ball in always on top over other elements, so events happen on it. Whatever handlers we set on lower elements, they won't work.
+Lo mismo con un elemento arrastrable. La pelota está siempre sobre los demás elementos, así que los eventos pasan en él. Cualquier manejador que pongamos en los elementos de abajo, no funcionará.
 
-That's why the initial idea to put handlers on potential droppables doesn't work in practice. They won't run.
+Por eso la idea inicial de poner manejadores en receptores potenciales no funciona en práctica. No se activarán.
 
-So, what to do?
+Entonces, ¿Qué hacer?
 
-There's a method called `document.elementFromPoint(clientX, clientY)`. It returns the most nested element on given window-relative coordinates (or `null` if coordinates are out of the window).
+Existe un método llamado `document.elementFromPoint(clientX, clientY)`. Este devuelve el elemento más anidado en las coordenadas relativas a la ventana proporcionada (o `null` si las coordenadas están fuera de la ventana). Si hay muchos elementos superpuestos en las mismas coordenadas, se devuelve el que está en el tope.
 
-So in any of our mouse event handlers we can detect the potential droppable under the pointer like this:
+Podemos utilizarlo en cualquiera de nuestros manejadores para detectar los receptores potenciales bajo el puntero, de esta forma:
 
 ```js
-// in a mouse event handler
-ball.hidden = true; // (*)
+// en un manejador de evento del ratón
+ball.hidden = true; // (*) ocultar el elemento que arrastramos
+
 let elemBelow = document.elementFromPoint(event.clientX, event.clientY);
+// elemBelow es el elemento debajo de la pelota, puede ser receptor
+
 ball.hidden = false;
-// elemBelow is the element below the ball. If it's droppable, we can handle it.
 ```
 
-Please note: we need to hide the ball before the call `(*)`. Otherwise we'll usually have a ball on these coordinates, as it's the top element under the pointer: `elemBelow=ball`.
+Favor notar: necesitamos ocultar la pelota antes de llamar `(*)`. De otra forma usualmente tendremos una pelota con esas coordenadas, ya que es el elemento superior bajo el puntero: `elemBelow=ball`. Así que lo ocultamos e inmediatamente lo mostramos de nuevo.
 
-We can use that code to check what we're "flying over" at any time. And handle the drop when it happens.
+Podemos usar este código para verificar el elemento sobre el que estamos "flotando" en todo momento. Y manejar la caída cuando sucede.
 
-An extended code of `onMouseMove` to find "droppable" elements:
+Un código extendido de `onMouseMove` para hallar elementos "receptores":
 
 ```js
-let currentDroppable = null; // potential droppable that we're flying over right now
+// elemento potencialmente arrastrable sobre el que flotamos ahora mismo
+let currentDroppable = null;
 
 function onMouseMove(event) {
   moveAt(event.pageX, event.pageY);
@@ -245,54 +250,54 @@ function onMouseMove(event) {
   let elemBelow = document.elementFromPoint(event.clientX, event.clientY);
   ball.hidden = false;
 
-  // mousemove events may trigger out of the window (when the ball is dragged off-screen)
-  // if clientX/clientY are out of the window, then elementfromPoint returns null
+  // los eventos mousemove se pueden activar fuera de la ventana (cuando la pelota se arrastra fuera de la ventana)
+  // si clientX/clientY están fuera de la ventana, entonces elementFromPoint devuelve null
   if (!elemBelow) return;
 
-  // potential droppables are labeled with the class "droppable" (can be other logic)
+  // receptores potenciales se etiquetan con la clase "droppable" (puede tener otra lógica)
   let droppableBelow = elemBelow.closest('.droppable');
 
-  if (currentDroppable != droppableBelow) { // if there are any changes
-    // we're flying in or out...
-    // note: both values can be null
-    //   currentDroppable=null if we were not over a droppable (e.g over an empty space)
-    //   droppableBelow=null if we're not over a droppable now, during this event
+  if (currentDroppable != droppableBelow) {
+    // estamos flotando dentro o afuera
+    // nota: ambos valores pueden ser null
+    //   currentDroppable=null si no estábamos sobre un receptor antes de este evento (ej. sobre un espacio en blanco)
+    //   droppableBelow=null si no estamos sobre un receptor ahora, durante este evento
 
     if (currentDroppable) {
-      // the logic to process "flying out" of the droppable (remove highlight)
+      // la lógica para procesar "flying out" del receptor (elimina el resaltado)
       leaveDroppable(currentDroppable);
     }
     currentDroppable = droppableBelow;
     if (currentDroppable) {
-      // the logic to process "flying in" of the droppable
+      // la lógica para procesar "flying in" del receptor
       enterDroppable(currentDroppable);
     }
   }
 }
 ```
 
-In the example below when the ball is dragged over the soccer gate, the gate is highlighted.
+En el siguiente ejemplo cuando la pelota se arrastra sobre la portería, esta se resalta.
 
 [codetabs height=250 src="ball4"]
 
-Now we have the current "drop target" in the variable `currentDroppable` during the whole process and can use it to highlight or any other stuff.
+Ahora tenemos el "destino" actual, sobre el que estamos flotando, en la variable `currentDroppable` durante el proceso completo y podemos usarlo para resaltar o cualquier otra cosa.
 
-## Summary
+## Resumen
 
-We considered a basic `Drag'n'Drop` algorithm.
+Consideramos un algoritmo básico de Arrastrar y Soltar.
 
-The key components:
+Los componentes clave:
 
-1. Events flow: `ball.mousedown` -> `document.mousemove` -> `ball.mouseup` (cancel native `ondragstart`).
-2. At the drag start -- remember the initial shift of the pointer relative to the element: `shiftX/shiftY` and keep it during the dragging.
-3. Detect droppable elements under the pointer using `document.elementFromPoint`.
+1. Flujo de eventos: `ball.mousedown` -> `document.mousemove` -> `ball.mouseup` (no olvides cancelar el `ondragstart` nativo).
+2. El inicio del arrastrado -- recuerda la posición inicial del puntero relativo al elemento: `shiftX/shiftY` y lo mantiene durante el arrastrado.
+3. Detectar elementos arrastrables bajo el puntero usando `document.elementFromPoint`.
 
-We can lay a lot on this foundation.
+Podemos poner mucho sobre esta base.
 
-- On `mouseup` we can finalize the drop: change data, move elements around.
-- We can highlight the elements we're flying over.
-- We can limit dragging by a certain area or direction.
-- We can use event delegation for `mousedown/up`. A large-area event handler that checks  `event.target` can manage Drag'n'Drop for hundreds of elements.
-- And so on.
+- Con `mouseup` podemos intelectualmente finalizar el arrastre: cambiar datos, mover elementos alrededor.
+- Podemos resaltar los elementos sobre los que estamos volando.
+- Podemos limitar el arrastrado a cierta área o dirección.
+- Podemos usar delegación de eventos para `mousedown/up`. Un manejador de eventos para un área grande que compruebe `event.target` puede manejar Arrastrar y Soltar para cientos de elementos.
+- Y así por el estilo.
 
-There are frameworks that build architecture over it: `DragZone`, `Droppable`, `Draggable` and other classes. Most of them do the similar stuff to described above, so it should be easy to understand them now. Or roll our own, because you already know how to handle the process, and it may be more flexible than to adapt something else.
+Hay frameworks que construyen una arquitectura sobre esto: `DragZone`, `Droppable`, `Draggable` y otras clases. La mayoría de ellos hacen cosas similares a lo que hemos descrito, así que debería ser fácil entenderlos ahora. O crea el tuyo propio: como puedes ver es fácil de hacer, a veces es más fácil que adaptarse a una solución de terceros.
